@@ -1,0 +1,14 @@
+# Sensitive Config
+src/main/resources/application.properties
+src/test/resources/application-test.properties
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ
+.idea/
+*.iml
+
+# macOS
+.DS_Store
