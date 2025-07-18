@@ -12,14 +12,18 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:/application.properties")
-@MapperScan(basePackages = "com.oroom")
-@ComponentScan(basePackages = "com.oroom")
+@MapperScan("com.oroom.user.mapper")  // 매퍼만 스캔
+@ComponentScan(basePackages = {
+        "com.oroom.user.service",    // 서비스 클래스들
+        "com.oroom.security"         // KakaoProperties, JwtTokenProvider
+})
 public class RootConfig {
 
     @Bean
@@ -65,9 +69,17 @@ public class RootConfig {
         SqlSessionFactoryBean factory = new SqlSessionFactoryBean();
         factory.setDataSource(dataSource());
         factory.setConfigLocation(applicationContext.getResource("classpath:/mybatis-config.xml"));
+
+        // 매퍼 위치 직접 지정 - 이 부분을 추가!
+        factory.setMapperLocations(
+                new PathMatchingResourcePatternResolver().getResources("classpath:mapper/**/*.xml")
+        );
+
+        // 타입 별칭 패키지 설정
+        factory.setTypeAliasesPackage("com.oroom.user.domain");
+
         return factory.getObject();
     }
-
     // 트랜잭션 매니저 설정
     @Bean
     public DataSourceTransactionManager transactionManager() {
