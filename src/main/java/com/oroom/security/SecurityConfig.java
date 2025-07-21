@@ -19,11 +19,6 @@ public class SecurityConfig {
         return new RestTemplate();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
     // Spring Security 설정 추가
     @Bean
     public WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
