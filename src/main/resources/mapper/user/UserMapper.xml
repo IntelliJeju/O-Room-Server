@@ -11,7 +11,11 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
         <result property="kakaoUserId" column="kakao_user_id"/>
+        <result property="connectedId" column="connected_id"/>
+        <result property="refreshToken" column="refresh_token"/>
+        <result property="birthDate" column="birth_date"/>
     </resultMap>
+
 
     <!-- 이메일로 사용자 조회 -->
     <select id="findByEmail" parameterType="String" resultMap="userResultMap">
@@ -29,18 +33,20 @@
 
     <!-- 사용자 생성 -->
     <insert id="insertUser" parameterType="com.oroom.user.domain.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (email, nickname, profile_image, created_at, updated_at, kakao_user_id)
-        VALUES (#{email}, #{nickname}, #{profileImage}, #{createdAt}, #{updatedAt}, #{kakaoUserId})
+        INSERT INTO user (email, nickname, profile_image, created_at, updated_at, kakao_user_id, connected_id, refresh_token, birth_date)
+        VALUES (#{email}, #{nickname}, #{profileImage}, #{createdAt}, #{updatedAt}, #{kakaoUserId}, #{connectedId}, #{refreshToken}, #{birthDate})
     </insert>
 
     <!-- 사용자 정보 업데이트 -->
     <update id="updateUser" parameterType="com.oroom.user.domain.User">
         UPDATE user
         SET nickname = #{nickname},
-            profile_image = #{profileImage},
-            updated_at = #{updatedAt},
-            kakao_user_id = #{kakaoUserId}
+        profile_image = #{profileImage},
+        updated_at = #{updatedAt},
+        kakao_user_id = #{kakaoUserId},
+        connected_id = #{connectedId},
+        refresh_token = #{refreshToken},
+        birth_date = #{birthDate}
         WHERE id = #{id}
     </update>
-
 </mapper>

@@ -72,6 +72,11 @@ public class AuthServiceImpl implements AuthService {
             // 5. Access Token + Refresh Token 생성 (email 기반)
             TokenPairDTO tokenPair = jwtTokenProvider.createTokenPair(user.getEmail());
 
+
+            // 6. Refresh Token을 DB에 저장  ← 이 부분 추가!
+            user.setRefreshToken(tokenPair.getRefreshToken());
+            userService.updateUser(user);
+
             log.info("JWT 토큰 발급 완료 - email: {}", user.getEmail());
 
             return LoginResponseDTO.builder()
@@ -83,10 +88,8 @@ public class AuthServiceImpl implements AuthService {
                             .nickname(user.getNickname())
                             .profileImage(user.getProfileImage())
                             .kakaoUserId(user.getKakaoUserId())
-                            .createdAt(user.getCreatedAt() != null ?
-                                    LocalDateTime.parse(user.getCreatedAt().toString()) : null)
-                            .updatedAt(user.getUpdatedAt() != null ?
-                                    LocalDateTime.parse(user.getUpdatedAt().toString()) : null)
+                            .createdAt(user.getCreatedAt())
+                            .updatedAt(user.getUpdatedAt() )
                             .build())
                     .accessTokenExpiresIn(600L)  // 10분
                     .refreshTokenExpiresIn(604800L)  // 7일

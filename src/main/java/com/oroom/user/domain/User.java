@@ -24,4 +24,7 @@ public class User {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
     private String kakaoUserId;
+    private String connectedId;
+    private String refreshToken;
+    private String birthDate;
 }
