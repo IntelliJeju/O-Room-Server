@@ -23,7 +23,7 @@ jobs:
 #      - name: Spring Legacy Build
 #        run: ./gradlew clean build -x test # test 제외하고 빌드
 
-# 수정 코드 (정상 작동 확인해야함)
+# 수정 코드
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
@@ -47,7 +47,7 @@ jobs:
 #      - name: Docker Hub Push
 #        run: docker push donghyunn/savit-server
 
-# 수정 코드 (정상 작동 확인해야함)
+# 수정 코드
       # Set up Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -102,6 +102,13 @@ jobs:
           port: ${{ secrets.EC2_SSH_PORT }}
           timeout: 60s
           script: |
+            # Docker Compose 설치 확인
+            if ! command -v docker-compose &> /dev/null; then
+              echo "Installing docker-compose..."
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+            
             # 기존 단일 컨테이너 정리 (Docker Compose 실행 전)
             sudo docker stop savit-server || true
             sudo docker rm savit-server || true
@@ -144,6 +151,10 @@ jobs:
 
             # Docker Compose로 서비스 시작
             sudo docker-compose up -d
+            
+            # 배포 후 실제 동작 확인
+            sleep 15
+            curl -f http://localhost:8080/savit || exit 1
 
             # 컨테이너 상태 확인
             sudo docker ps
@@ -154,7 +165,7 @@ jobs:
 #        run: |
 #          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
 
-# 수정 코드 (정상작동 확인 필요)
+# 수정 코드
       # 마지막에 항상 실행되도록
       - name: Remove IP FROM security group
         if: always()  # 추가
