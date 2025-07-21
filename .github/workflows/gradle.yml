@@ -1,0 +1,169 @@
+name: Savit Server CI/CD with Docker
+
+on:
+  push:
+    branches: ['feature/cicd'] # main 브랜치에 push할 때 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+# 기존 코드
+#      # Spring Legacy Build (WAR)
+#      - name: Spring Legacy Build
+#        run: ./gradlew clean build -x test # test 제외하고 빌드
+
+# 수정 코드
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Spring Legacy Build
+        run: ./gradlew clean build -x test
+# 수정 코드 끝
+
+# 기존 코드
+#      # Docker Image Build
+#      - name: Docker Image Build
+#        run: docker build -t donghyunn/savit-server .
+#
+#      # DockerHub Login
+#      - name: Docker Hub Login
+#        uses: docker/login-action@v2
+#        with:
+#          username: ${{ secrets.DOCKERHUB_USERNAME }}
+#          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#
+#      # Docker Hub push
+#      - name: Docker Hub Push
+#        run: docker push donghyunn/savit-server
+
+# 수정 코드
+      # Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # DockerHub Login
+      - name: Docker Hub Login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Build and Push Docker Image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: donghyunn/savit-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+# 수정 코드 끝
+
+      # GET GitHub IP
+      - name: Get GitHub IP
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Add GitHub IP to AWS
+        run: |
+          echo "Using Security Group ID: ${{ secrets.AWS_SG_ID }}"
+          echo "Current AWS Account:"
+          aws sts get-caller-identity
+          echo "Available Security Groups:"
+          aws ec2 describe-security-groups --query 'SecurityGroups[*].[GroupId,GroupName]' --output table
+          aws ec2 authorize-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+      # AWS EC2 Server Connect & Docker Deploy
+      - name: AWS EC2 Connection
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          timeout: 60s
+          script: |
+            # Docker Compose 설치 확인
+            if ! command -v docker-compose &> /dev/null; then
+              echo "Installing docker-compose..."
+              sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            fi
+            
+            # 기존 단일 컨테이너 정리 (Docker Compose 실행 전)
+            sudo docker stop savit-server || true
+            sudo docker rm savit-server || true
+            
+            # Docker Compose 파일 생성
+            cat > docker-compose.yml << 'EOF'
+            services:
+              redis:
+                image: redis:7-alpine
+                container_name: savit-redis
+                ports:
+                  - "6379:6379"
+                volumes:
+                  - redis_data:/data
+                restart: unless-stopped
+                command: redis-server --appendonly yes
+
+              app:
+                image: donghyunn/savit-server
+                container_name: savit-server
+                ports:
+                  - "8080:8080"
+                depends_on:
+                  - redis
+                environment:
+                  - REDIS_HOST=redis
+                  - REDIS_PORT=6379
+                restart: unless-stopped
+
+            volumes:
+              redis_data:
+            EOF
+
+            # 기존 컨테이너들 정리
+            sudo docker-compose down || true
+
+            # 최신 이미지 다운로드
+            sudo docker pull donghyunn/savit-server
+
+            # Docker Compose로 서비스 시작
+            sudo docker-compose up -d
+            
+            # 컨테이너 상태 확인
+            sudo docker ps
+
+# 기존 코드
+#      # Remove GitHub IP from Security Group
+#      - name: Remove IP FROM security group
+#        run: |
+#          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+
+# 수정 코드
+      # 마지막에 항상 실행되도록
+      - name: Remove IP FROM security group
+        if: always()  # 추가
+        run: |
+          aws ec2 revoke-security-group-ingress --group-id ${{ secrets.AWS_SG_ID }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32 || true
+
