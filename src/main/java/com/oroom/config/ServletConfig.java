@@ -6,6 +6,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(basePackages = "com.oroom")
-public class ServletConfig {
+@ComponentScan(basePackages = {
+        "com.oroom.user.controller"  // 컨트롤러들만
+})public class ServletConfig {
 }
