@@ -66,6 +66,10 @@ dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
+    // Redis
+    implementation 'org.springframework.data:spring-data-redis:2.7.5'
+    implementation 'redis.clients:jedis:3.9.0'
+
     // Test
     testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
