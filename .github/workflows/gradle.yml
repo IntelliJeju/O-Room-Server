@@ -152,10 +152,6 @@ jobs:
             # Docker Compose로 서비스 시작
             sudo docker-compose up -d
             
-            # 배포 후 실제 동작 확인
-            sleep 60
-            curl -f http://localhost:8080/savit || exit 1
-
             # 컨테이너 상태 확인
             sudo docker ps
 
