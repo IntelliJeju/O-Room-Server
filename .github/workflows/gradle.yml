@@ -115,7 +115,6 @@ jobs:
             
             # Docker Compose 파일 생성
             cat > docker-compose.yml << 'EOF'
-            version: '3.9'
             services:
               redis:
                 image: redis:7-alpine
