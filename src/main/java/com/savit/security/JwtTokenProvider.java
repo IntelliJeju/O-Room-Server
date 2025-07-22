@@ -18,7 +18,7 @@ public class JwtTokenProvider {
     private String secretKey;
 
     @Value("${jwt.access-token-expiration}")
-    private long accessTokenValidityInMilliseconds;  // 1시간
+    private long accessTokenValidityInMilliseconds;  // 10분
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenValidityInMilliseconds; // 7일
@@ -28,7 +28,8 @@ public class JwtTokenProvider {
      */
     public String createAccessToken(String userId) {
         Claims claims = Jwts.claims().setSubject(userId);
-        claims.put("type", "access"); // 토큰 타입 구분
+        // 토큰 타입 구분
+        claims.put("type", "access");
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);

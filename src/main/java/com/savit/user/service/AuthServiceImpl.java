@@ -73,7 +73,7 @@ public class AuthServiceImpl implements AuthService {
             TokenPairDTO tokenPair = jwtTokenProvider.createTokenPair(user.getEmail());
 
 
-            // 6. Refresh Token을 DB에 저장  ← 이 부분 추가!
+            // 6. Refresh Token을 DB에 저장
             user.setRefreshToken(tokenPair.getRefreshToken());
             userService.updateUser(user);
 
