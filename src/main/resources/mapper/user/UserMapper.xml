@@ -1,9 +1,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.oroom.user.mapper.UserMapper">
+<mapper namespace="com.savit.user.mapper.UserMapper">
 
     <!-- Result Map -->
-    <resultMap id="userResultMap" type="com.oroom.user.domain.User">
+    <resultMap id="userResultMap" type="com.savit.user.domain.User">
         <id property="id" column="id"/>
         <result property="email" column="email"/>
         <result property="nickname" column="nickname"/>
@@ -32,13 +32,13 @@
     </select>
 
     <!-- 사용자 생성 -->
-    <insert id="insertUser" parameterType="com.oroom.user.domain.User" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertUser" parameterType="com.savit.user.domain.User" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (email, nickname, profile_image, created_at, updated_at, kakao_user_id, connected_id, refresh_token, birth_date)
         VALUES (#{email}, #{nickname}, #{profileImage}, #{createdAt}, #{updatedAt}, #{kakaoUserId}, #{connectedId}, #{refreshToken}, #{birthDate})
     </insert>
 
     <!-- 사용자 정보 업데이트 -->
-    <update id="updateUser" parameterType="com.oroom.user.domain.User">
+    <update id="updateUser" parameterType="com.savit.user.domain.User">
         UPDATE user
         SET nickname = #{nickname},
         profile_image = #{profileImage},
