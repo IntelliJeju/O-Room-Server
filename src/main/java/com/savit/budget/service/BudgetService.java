@@ -1,0 +1,8 @@
+package com.savit.budget.service;
+
+import com.savit.budget.dto.BudgetDTO;
+
+public interface BudgetService {
+    void createBudget(BudgetDTO dto, Long userId);
+    int changeBudget(BudgetDTO dto, Long userId);
+}
