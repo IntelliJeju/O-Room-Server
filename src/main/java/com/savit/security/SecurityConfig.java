@@ -1,4 +1,5 @@
-import com.savit.security.JwtAuthenticationFilter;
+package com.savit.security;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -22,20 +23,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public WebSecurityConfigurerAdapter webSecurityConfigurerAdapter() {
-        return new WebSecurityConfigurerAdapter() {
-            @Override
-            protected void configure(HttpSecurity http) throws Exception {
-                http
-                        .csrf().disable()
-                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                        .and()
-                        .authorizeRequests()
-                        .antMatchers("/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                        .and()
-                        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);  // 추가
-            }
-        };
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .csrf().disable()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
     }
-}
+};

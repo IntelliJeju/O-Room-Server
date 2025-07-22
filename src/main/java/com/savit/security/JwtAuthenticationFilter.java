@@ -21,7 +21,6 @@ public class JwtAuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // OPTIONS 요청은 통과
         if ("OPTIONS".equals(httpRequest.getMethod())) {
             chain.doFilter(request, response);
             return;

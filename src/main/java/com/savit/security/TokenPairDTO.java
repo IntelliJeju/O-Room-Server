@@ -14,7 +14,6 @@ public class TokenPairDTO {
     private String accessToken;
     private String refreshToken;
 
-    // 토큰 만료 시간 정보
     private Long accessTokenExpiresIn;
     private Long refreshTokenExpiresIn;
 }
