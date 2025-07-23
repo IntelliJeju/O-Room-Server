@@ -1,0 +1,27 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.budget.mapper.BudgetCategoryMapper">
+
+
+    <insert id="insertBudgetCategory">
+        INSERT INTO budgetcategory (target_amount, budget_id, category_id)
+        VALUES ( #{targetAmount}, #{budgetId},#{categoryId})
+    </insert>
+    <update id="updateBudgetCategory">
+        update budgetcategory set target_amount = #{targetAmount}
+        where budget_id = #{budgetId} and category_id = #{categoryId}
+    </update>
+
+    <select id="getBudgetCategories" resultType="com.savit.budget.domain.BudgetCategoryVO">
+        SELECT id, target_amount as targetAmount, budget_id as budgetId, category_id as categoryId
+        FROM budgetcategory
+        WHERE budget_id = #{budgetId}
+        <if test="categoryIds != null and categoryIds.size() > 0">
+            and category_id in
+            <foreach collection="categoryIds" item="categoryId" open="(" close=")" separator=",">
+                #{categoryId}
+            </foreach>
+        </if>
+        ORDER BY category_id
+    </select>
+</mapper>

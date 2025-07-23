@@ -4,11 +4,11 @@
 
 
     <insert id="insertBudget" >
-        INSERT INTO Budget (user_id, month, total_budget)
+        INSERT INTO budget (user_id, month, total_budget)
         values (#{userId}, #{month}, #{totalBudget})
     </insert>
     <update id="updateBudget">
-        update Budget
+        update budget
         set total_budget = #{totalBudget}
             where user_id = #{userId} AND month = #{month}
     </update>
