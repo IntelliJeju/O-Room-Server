@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.card.mapper.CodefTokenMapper">
+
+    <resultMap id="CodefTokenMap" type="com.savit.card.domain.CodefToken">
+        <id     property="id"           column="id"/>
+        <result property="accessToken"  column="access_token"/>
+        <result property="expiresAt"    column="expires_at"/>
+        <result property="createdAt"    column="created_at"/>
+        <result property="updatedAt"    column="updated_at"/>
+    </resultMap>
+
+    <select id="findValidToken" resultMap="CodefTokenMap">
+        SELECT *
+        FROM   CodefAccessToken
+        WHERE  expires_at > NOW()
+        ORDER  BY id DESC
+            LIMIT  1
+    </select>
+
+    <insert id="insertToken"
+            parameterType="com.savit.card.domain.CodefToken"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO CodefAccessToken
+            (access_token, expires_at, created_at, updated_at)
+        VALUES
+            (#{accessToken}, #{expiresAt}, #{createdAt}, #{updatedAt})
+    </insert>
+
+</mapper>

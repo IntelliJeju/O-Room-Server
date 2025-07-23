@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.card.mapper.CardMapper">
+
+    <insert id="insertCards">
+        INSERT INTO Card (
+        connected_id,
+        organization,
+        card_name,
+        issuer,
+        res_card_no,
+        card_password,
+        res_card_type,
+        res_sleep_yn,
+        registered_at,
+        user_id
+        )
+        VALUES
+        <foreach collection="cards" item="card" separator=",">
+            (
+            #{card.connectedId},
+            #{card.organization},
+            #{card.cardName},
+            #{card.issuer},
+            #{card.resCardNo},
+            #{card.cardPassword},
+            #{card.resCardType},
+            #{card.resSleepYn},
+            #{card.registeredAt},
+            #{card.userId}
+            )
+        </foreach>
+    </insert>
+
+</mapper>
