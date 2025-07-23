@@ -3,6 +3,8 @@ package com.savit.card.controller;
 import com.savit.card.dto.CardRegisterRequest;
 import com.savit.card.service.CardService;
 import com.savit.security.JwtUtil;
+import com.savit.user.domain.User;
+import com.savit.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,6 +25,7 @@ public class CardController {
 
     private final CardService cardService;
     private final JwtUtil jwtUtil;
+    private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerCardAndFetch(
@@ -30,6 +33,10 @@ public class CardController {
 
         try {
             Long userId = jwtUtil.getUserIdFromToken(request);
+
+            User user = userService.findById(userId);
+            user.setBirthDate(req.getBirthDate());
+            userService.updateUser(user);
 
             String connectedId =
                     cardService.registerAccount(req);
