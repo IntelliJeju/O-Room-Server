@@ -2,6 +2,7 @@ package com.savit.config;
 
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -14,6 +15,7 @@ import javax.servlet.Filter;
 import javax.servlet.ServletRegistration;
 
 @Configuration
+@ComponentScan(basePackages = "com.savit")
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
 
     // 루트 설정 클래스 (DB, 보안 등 전역 설정)

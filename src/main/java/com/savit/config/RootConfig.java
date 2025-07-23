@@ -19,12 +19,8 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:/application.properties")
-@MapperScan(basePackages =  {"com.savit.user.mapper", "com.savit.budget.mapper"})  // 매퍼만 스캔
-@ComponentScan(basePackages = {
-        "com.savit.user.service",    // 서비스 클래스들
-        "com.savit.security",         // KakaoProperties, JwtTokenProvider
-        "com.savit.budget.service"
-})
+@MapperScan(basePackages = "com.savit.**.mapper")
+@ComponentScan(basePackages = "com.savit")
 public class RootConfig {
 
     @Bean
@@ -77,7 +73,7 @@ public class RootConfig {
         );
 
         // 타입 별칭 패키지 설정
-        factory.setTypeAliasesPackage("com.oroom.user.domain");
+        factory.setTypeAliasesPackage("com.savit.user.domain");
 
         return factory.getObject();
     }
