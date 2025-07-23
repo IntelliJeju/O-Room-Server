@@ -19,10 +19,11 @@ import javax.sql.DataSource;
 
 @Configuration
 @PropertySource("classpath:/application.properties")
-@MapperScan("com.savit.user.mapper")  // 매퍼만 스캔
+@MapperScan(basePackages =  {"com.savit.user.mapper", "com.savit.budget.mapper"})  // 매퍼만 스캔
 @ComponentScan(basePackages = {
         "com.savit.user.service",    // 서비스 클래스들
-        "com.savit.security"         // KakaoProperties, JwtTokenProvider
+        "com.savit.security",         // KakaoProperties, JwtTokenProvider
+        "com.savit.budget.service"
 })
 public class RootConfig {
 
@@ -70,7 +71,7 @@ public class RootConfig {
         factory.setDataSource(dataSource());
         factory.setConfigLocation(applicationContext.getResource("classpath:/mybatis-config.xml"));
 
-        // 매퍼 위치 직접 지정 - 이 부분을 추가!
+        // 매퍼 위치 직접 지정
         factory.setMapperLocations(
                 new PathMatchingResourcePatternResolver().getResources("classpath:mapper/**/*.xml")
         );
