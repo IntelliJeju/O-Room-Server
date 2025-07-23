@@ -10,6 +10,7 @@
         organization,
         card_name,
         issuer,
+        encrypted_card_no,
         res_card_no,
         card_password,
         res_card_type,
@@ -24,6 +25,7 @@
             #{card.organization},
             #{card.cardName},
             #{card.issuer},
+            #{card.encryptedCardNo},
             #{card.resCardNo},
             #{card.cardPassword},
             #{card.resCardType},
@@ -33,5 +35,4 @@
             )
         </foreach>
     </insert>
-
 </mapper>

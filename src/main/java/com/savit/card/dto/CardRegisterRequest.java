@@ -9,4 +9,5 @@ public class CardRegisterRequest {
     private String loginPw;
     private String birthDate;
     private String cardPassword;
+    private String encryptedCardNo;
 }

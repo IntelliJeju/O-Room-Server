@@ -14,6 +14,7 @@ public class Card {
     private String organization;
     private String cardName;
     private String issuer;
+    private String encryptedCardNo;
     private String resCardNo;
     private String cardPassword;
     private String resCardType;

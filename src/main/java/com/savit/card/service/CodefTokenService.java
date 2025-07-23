@@ -32,7 +32,7 @@ public class CodefTokenService {
         try {
             EasyCodef client = codefUtil.newClient();
 
-            String accessToken = client.requestToken(EasyCodefServiceType.API);
+            String accessToken = client.requestToken(EasyCodefServiceType.DEMO);
             log.info("[CODEF] accessToken = '{}'", accessToken);
 
             if (accessToken == null || accessToken.isBlank()) {
