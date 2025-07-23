@@ -9,4 +9,5 @@ import java.math.BigDecimal;
 public interface BudgetMapper {
     void insertBudget(BudgetVO vo);
     int updateBudget(BudgetVO vo);
+    BudgetVO getBudget(Long userId, String month);
 }

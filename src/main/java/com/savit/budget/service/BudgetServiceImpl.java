@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 public class BudgetServiceImpl implements BudgetService{
 
     private final BudgetMapper budgetMapper;
+
     @Override
     public void createBudget(BudgetDTO dto, Long userId) {
         String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
@@ -39,6 +40,12 @@ public class BudgetServiceImpl implements BudgetService{
                 .userId(userId)
                 .month(currentMonth)
                 .totalBudget(budgetDTO.getTotalBudget()).build();
-        budgetMapper.updateBudget(vo);
+       return budgetMapper.updateBudget(vo);
+    }
+
+    @Override
+    public BudgetVO getBudget(Long userId) {
+        String curMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
+        return budgetMapper.getBudget(userId,curMonth);
     }
 }

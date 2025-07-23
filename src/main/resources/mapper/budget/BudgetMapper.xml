@@ -12,5 +12,8 @@
         set total_budget = #{totalBudget}
             where user_id = #{userId} AND month = #{month}
     </update>
+    <select id="getBudget" resultType="com.savit.budget.domain.BudgetVO">
+        Select * from budget where user_id = #{userId} and month = #{month}
+    </select>
 
 </mapper>
