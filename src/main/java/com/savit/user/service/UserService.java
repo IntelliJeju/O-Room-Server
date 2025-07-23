@@ -7,4 +7,5 @@ public interface UserService {
     User findByKakaoUserId(String kakaoUserId);
     void createUser(User user);
     void updateUser(User user);
+    User findById(Long id);
 }
