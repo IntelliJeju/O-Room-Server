@@ -69,15 +69,14 @@ public class AuthServiceImpl implements AuthService {
                 userService.updateUser(user);
             }
 
-            // 5. Access Token + Refresh Token 생성 (email 기반)
-            TokenPairDTO tokenPair = jwtTokenProvider.createTokenPair(user.getEmail());
-
+            // 5. Access Token + Refresh Token 생성 (userId 기반)
+            TokenPairDTO tokenPair = jwtTokenProvider.createTokenPair(user.getId().toString());
 
             // 6. Refresh Token을 DB에 저장
             user.setRefreshToken(tokenPair.getRefreshToken());
             userService.updateUser(user);
 
-            log.info("JWT 토큰 발급 완료 - email: {}", user.getEmail());
+            log.info("JWT 토큰 발급 완료 - userId: {}", user.getId());
 
             return LoginResponseDTO.builder()
                     .accessToken(tokenPair.getAccessToken())
@@ -89,15 +88,14 @@ public class AuthServiceImpl implements AuthService {
                             .profileImage(user.getProfileImage())
                             .kakaoUserId(user.getKakaoUserId())
                             .createdAt(user.getCreatedAt())
-                            .updatedAt(user.getUpdatedAt() )
+                            .updatedAt(user.getUpdatedAt())
                             .build())
                     .accessTokenExpiresIn(600L)  // 10분
                     .refreshTokenExpiresIn(604800L)  // 7일
                     .success(true)
                     .message("로그인 성공")
                     .build();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("카카오 로그인 처리 중 오류 발생:", e);
             throw e;
         }
@@ -120,22 +118,22 @@ public class AuthServiceImpl implements AuthService {
                 throw new IllegalArgumentException("Refresh Token이 아닙니다.");
             }
 
-            // 3. Refresh Token에서 사용자 email 추출
-            String userEmail = jwtTokenProvider.getUserId(refreshToken);  // email이 저장됨
-            User user = userService.findByEmail(userEmail);  // findByEmail 사용
+            // 3. Refresh Token에서 userId 추출
+            Long userId = Long.parseLong(jwtTokenProvider.getUserId(refreshToken));
+            User user = userService.findById(userId);  // userId 기반 조회
 
             if (user == null) {
                 throw new IllegalArgumentException("존재하지 않는 사용자입니다.");
             }
 
-            // 4. 새로운 Access Token 생성 (email 기반, Refresh Token은 재사용)
-            String newAccessToken = jwtTokenProvider.createAccessToken(userEmail);
+            // 4. 새로운 Access Token 생성 (userId 기반)
+            String newAccessToken = jwtTokenProvider.createAccessToken(String.valueOf(userId));
 
-            log.info("Access Token 갱신 완료 - email: {}", userEmail);
+            log.info("Access Token 갱신 완료 - userId: {}", userId);
 
             return LoginResponseDTO.builder()
                     .accessToken(newAccessToken)
-                    .refreshToken(refreshToken)  // 기존 Refresh Token 재사용
+                    .refreshToken(refreshToken)
                     .user(User.builder()
                             .id(user.getId())
                             .email(user.getEmail())

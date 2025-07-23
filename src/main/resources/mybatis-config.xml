@@ -6,4 +6,9 @@
     <settings>
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
+
+    <mappers>
+        <package name = "com.savit.user.mapper"/>
+        <package name = "com.savit.card.mapper"/>
+    </mappers>
 </configuration>

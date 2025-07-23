@@ -49,4 +49,9 @@
         birth_date = #{birthDate}
         WHERE id = #{id}
     </update>
+
+    <!-- userId 기반 사용자 조회 -->
+    <select id="findById" resultType="com.savit.user.domain.User">
+        SELECT * FROM User WHERE id = #{id}
+    </select>
 </mapper>
