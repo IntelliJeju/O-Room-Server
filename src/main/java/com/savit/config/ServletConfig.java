@@ -8,6 +8,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @ComponentScan(basePackages = {
         "com.savit.user.controller",
-        "com.savit.budget.controller"// 컨트롤러들만
+        "com.savit.budget.controller",
+        "com.savit.card.controller"
 })public class ServletConfig {
 }
