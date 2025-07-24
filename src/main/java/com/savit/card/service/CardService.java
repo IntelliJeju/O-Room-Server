@@ -42,7 +42,9 @@ public class CardService {
         account.put("loginType", "1");
         account.put("loginTypeLevel", "2");
         account.put("id", req.getLoginId());
-        account.put("password", req.getLoginPw());
+        // 카드사 비밀번호 테스트용으로 여기서 암호화 진행
+        // 추후 req.fetLoginPw() 만 사용
+        account.put("password", codefUtil.encryptRSA(req.getLoginPw()));
         account.put("birthDate", req.getBirthDate());
 
         List<HashMap<String, Object>> list = List.of(account);
@@ -113,11 +115,15 @@ public class CardService {
                         .organization(organization)
                         .cardName((String) data.get("resCardName"))
                         .issuer((String) data.get("issuer"))
-                        .encryptedCardNo(encryptedCardNo)
+                        // 사용자입력부 평문 입력 -> 프론트에서 encryptRSA 한 값 받아옴
+                        // 테스트 위해 임시로 codefUtil.encryptRSA(encryptedCardNo) 사용
+                        // 추후 .encryptedCardNo(encryptedCardNo) 로 변경해야 함
+                        .encryptedCardNo(codefUtil.encryptRSA(encryptedCardNo))
                         .resCardNo((String) data.get("resCardNo"))
                         .resCardType((String) data.get("resCardType"))
                         .resSleepYn((String) data.get("resSleepYn"))
-                        .cardPassword(cardPassword)
+                        // 비번도 마찬가지로 추후 변경
+                        .cardPassword(codefUtil.encryptRSA(cardPassword))
                         .registeredAt(LocalDateTime.now())
                         .userId(userId)
                         .build())
