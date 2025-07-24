@@ -19,7 +19,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/budget")
+@RequestMapping("/api/budget")
 @RequiredArgsConstructor
 @Slf4j
 public class BudgetController {
