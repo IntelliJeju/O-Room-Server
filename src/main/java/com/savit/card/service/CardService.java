@@ -42,7 +42,7 @@ public class CardService {
         account.put("loginType", "1");
         account.put("loginTypeLevel", "2");
         account.put("id", req.getLoginId());
-        account.put("password", codefUtil.encryptRSA(req.getLoginPw()));
+        account.put("password", req.getLoginPw());
         account.put("birthDate", req.getBirthDate());
 
         List<HashMap<String, Object>> list = List.of(account);
@@ -84,8 +84,21 @@ public class CardService {
         );
         log.info("[CODEF] createAccount 응답 = {}", resp);
 
-        Map<?, ?> map = new ObjectMapper().readValue(resp, Map.class);
-        return (List<Map<String, Object>>) map.get("data");
+
+        Map<String, Object> map = new ObjectMapper().readValue(resp, Map.class);
+        Object dataObj = map.get("data");
+
+        List<Map<String, Object>> cardList;
+
+        if (dataObj instanceof List) {
+            cardList = (List<Map<String, Object>>) dataObj;
+        } else if (dataObj instanceof Map) {
+            cardList = List.of((Map<String, Object>) dataObj);
+        } else {
+            throw new IllegalStateException("예상치 못한 카드 응답 형식: " + dataObj);
+        }
+
+        return cardList;
     }
 
     public void saveCards(List<Map<String, Object>> cardDataList,
@@ -98,7 +111,7 @@ public class CardService {
         List<Card> cards = cardDataList.stream().map(data -> Card.builder()
                         .connectedId(connectedId)
                         .organization(organization)
-                        .cardName((String) data.get("cardName"))
+                        .cardName((String) data.get("resCardName"))
                         .issuer((String) data.get("issuer"))
                         .encryptedCardNo(encryptedCardNo)
                         .resCardNo((String) data.get("resCardNo"))
