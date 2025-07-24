@@ -3,6 +3,7 @@ package com.savit.budget.controller;
 import com.savit.budget.domain.BudgetCategoryVO;
 import com.savit.budget.domain.BudgetVO;
 import com.savit.budget.dto.BudgetCategoryDTO;
+import com.savit.budget.dto.BudgetCategorySearchDTO;
 import com.savit.budget.dto.BudgetDTO;
 import com.savit.budget.service.BudgetCategoryService;
 import com.savit.budget.service.BudgetService;
@@ -67,14 +68,15 @@ public class BudgetController {
         }
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/categories")
-    public ResponseEntity<Map<String, List<BudgetCategoryVO>>> getBudgetCategories(
-            @RequestParam(required = false) List<String> months,        // 여러 월
-            @RequestParam(required = false) List<Long> categoryIds,     // 여러 카테고리
-            HttpServletRequest request) {
 
+    // 조회
+    @PostMapping("/categories/list")
+    public ResponseEntity<Map<String, List<BudgetCategoryVO>>> getBudgetCategories(
+            @RequestBody BudgetCategorySearchDTO searchDTO,
+            HttpServletRequest request) {
         Long userId = jwtUtil.getUserIdFromToken(request);
-        Map<String, List<BudgetCategoryVO>> result = budgetCategoryService.getBudgetCategories(userId, months, categoryIds);
+        Map<String, List<BudgetCategoryVO>> result = budgetCategoryService.getBudgetCategories(
+                userId, searchDTO.getMonths(), searchDTO.getCategoryIds());
         return ResponseEntity.ok(result);
     }
 }

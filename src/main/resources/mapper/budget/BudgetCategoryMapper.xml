@@ -13,11 +13,10 @@
     </update>
 
     <select id="getBudgetCategories" resultType="com.savit.budget.domain.BudgetCategoryVO">
-        SELECT id, target_amount as targetAmount, budget_id as budgetId, category_id as categoryId
-        FROM budgetcategory
+        SELECT * FROM budgetcategory
         WHERE budget_id = #{budgetId}
         <if test="categoryIds != null and categoryIds.size() > 0">
-            and category_id in
+            AND category_id IN
             <foreach collection="categoryIds" item="categoryId" open="(" close=")" separator=",">
                 #{categoryId}
             </foreach>

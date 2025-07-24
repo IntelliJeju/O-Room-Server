@@ -88,7 +88,7 @@ public class BudgetCategoryServiceImpl implements BudgetCategoryService{
 
     @Override
     public Map<String, List<BudgetCategoryVO>> getBudgetCategories(Long userId, List<String> months, List<Long> categoryIds) {
-        // months가 null이면 현재월만 사용, categoryIds null이면 전체 조회
+        // months가 null이면 현재월만 사용
         if (months == null || months.isEmpty()) {
             String currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM"));
             months = Arrays.asList(currentMonth);
@@ -97,15 +97,15 @@ public class BudgetCategoryServiceImpl implements BudgetCategoryService{
         Map<String, List<BudgetCategoryVO>> result = new HashMap<>();
 
         for (String month : months) {
-            // 해당 월의 Budget 조회해서 budgetId 얻기
+            // 해당 월의 budget 조회해서 budgetId 얻기
             BudgetVO budget = budgetMapper.getBudget(userId, month);
             if (budget == null) {
                 log.warn("예산 미설정: userId={}, month={}", userId, month);
-                result.put(month, new ArrayList<>()); // 빈 리스트로 설정
+                result.put(month, new ArrayList<>());
                 continue;
             }
 
-            // BudgetCategory 조회
+            // budgetCategory 조회
             List<BudgetCategoryVO> categories = budgetCategoryMapper.getBudgetCategories(budget.getId(), categoryIds);
             result.put(month, categories);
         }
