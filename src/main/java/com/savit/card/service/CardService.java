@@ -92,6 +92,7 @@ public class CardService {
                           String connectedId,
                           String organization,
                           Long userId,
+                          String encryptedCardNo,
                           String cardPassword) {
 
         List<Card> cards = cardDataList.stream().map(data -> Card.builder()
@@ -99,11 +100,12 @@ public class CardService {
                         .organization(organization)
                         .cardName((String) data.get("cardName"))
                         .issuer((String) data.get("issuer"))
-                        .resCardNo(codefUtil.encryptRSA((String) data.get("resCardNo")))
+                        .encryptedCardNo(encryptedCardNo)
+                        .resCardNo((String) data.get("resCardNo"))
                         .resCardType((String) data.get("resCardType"))
                         .resSleepYn((String) data.get("resSleepYn"))
-                        .registeredAt(LocalDateTime.now())
                         .cardPassword(cardPassword)
+                        .registeredAt(LocalDateTime.now())
                         .userId(userId)
                         .build())
                 .toList();

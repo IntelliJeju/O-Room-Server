@@ -48,7 +48,7 @@ public class CardController {
                             req.getBirthDate()
                     );
 
-            cardService.saveCards(cards, connectedId, req.getOrganization(), userId, req.getCardPassword());
+            cardService.saveCards(cards, connectedId, req.getOrganization(), userId, req.getEncryptedCardNo(), req.getCardPassword());
 
             return ResponseEntity.ok(Map.of(
                     "connectedId", connectedId,
