@@ -2,6 +2,7 @@ package com.savit.budget.mapper;
 
 import com.savit.budget.domain.BudgetVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
 
@@ -9,5 +10,5 @@ import java.math.BigDecimal;
 public interface BudgetMapper {
     void insertBudget(BudgetVO vo);
     int updateBudget(BudgetVO vo);
-    BudgetVO getBudget(Long userId, String month);
+    BudgetVO getBudget(@Param("userId") Long userId, @Param("month") String month);
 }
