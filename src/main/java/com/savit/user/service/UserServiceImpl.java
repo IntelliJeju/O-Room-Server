@@ -32,4 +32,9 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         userMapper.updateUser(user);
     }
+
+    @Override
+    public User findById(Long id) {
+        return userMapper.findById(id);
+    }
 }

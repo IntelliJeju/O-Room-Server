@@ -10,4 +10,5 @@ public interface UserMapper {
     User findByKakaoUserId(String kakaoUserId);
     void insertUser(User user);
     void updateUser(User user);
+    User findById(Long id);
 }

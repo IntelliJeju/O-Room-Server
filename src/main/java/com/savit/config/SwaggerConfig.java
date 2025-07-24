@@ -17,9 +17,9 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
-    private final String API_NAME = "ORoom";
+    private final String API_NAME = "Savit";
     private final String API_VERSION = "1.0";
-    private final String API_DESCRIPTION = "KB 6기 오룸 프로젝트";
+    private final String API_DESCRIPTION = "KB 6기 savit 프로젝트";
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
