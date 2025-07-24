@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.card.mapper.CardApprovalMapper">
+    <resultMap id="approvalApiDataMap" type="com.savit.card.dto.ApprovalApiDataDTO">
+        <result property="birthDate" column="birth_date"/>
+        <result property="connectedId" column="connected_id"/>
+        <result property="organization" column="organization"/>
+        <result property="resCardNo" column="res_card_no"/>
+        <result property="cardPassword" column="card_password"/>
+        <result property="cardName" column="card_name"/>
+    </resultMap>
+    <select id="findDataForApprovalApi" resultType="com.savit.card.dto.ApprovalApiDataDTO">
+        SELECT
+            u.birth_date,      # AS birthDate
+            c.connected_id,    # AS connectedId,
+            c.organization,    # AS organization,
+            c.res_card_no,     # AS resCardNo,
+            c.card_name,       # AS cardName,
+            c.card_password   # AS cardPassword
+        FROM
+            User u
+                JOIN
+            Card c ON u.id = c.user_id
+        WHERE
+            u.id = #{userId} AND c.id = #{cardId}
+    </select>
+
+    <insert id="insertApprovals">
+        INSERT INTO CardTransaction (
+        card_id,
+        res_card_no,
+        res_used_date,
+        res_used_time,
+        res_used_amount,
+        res_cancel_yn,
+        res_cancel_amount,
+        res_total_amount,
+        budget_category_id,
+        category_id,
+        res_member_store_name,
+        res_member_store_type,
+        created_at,
+        updated_at
+        )
+        VALUES
+        <foreach collection="approvals" item="approval" separator=",">
+            (
+            #{approval.cardId},
+            #{approval.resCardNo},
+            #{approval.resUsedDate},
+            #{approval.resUsedTime},
+            #{approval.resUsedAmount},
+            #{approval.resCancelYN},
+            #{approval.resCancelAmount},
+            #{approval.resTotalAmount},
+            #{approval.budgetCategoryId},
+            #{approval.categoryId},
+            #{approval.resMemberStoreName},
+            #{approval.resMemberStoreType},
+            #{approval.createdAt},
+            #{approval.updatedAt}
+            )
+        </foreach>
+    </insert>
+
+</mapper>
