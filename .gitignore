@@ -1,0 +1,21 @@
+# Sensitive Config
+src/main/resources/application.properties
+src/test/resources/application-test.properties
+src/main/resources/private-key.pem
+
+# Gradle
+.gradle/
+build/
+
+# IntelliJ
+.idea/
+*.iml
+
+# md File
+*.md
+
+# pem File
+*.pem
+
+# macOS
+.DS_Store.gradle/
