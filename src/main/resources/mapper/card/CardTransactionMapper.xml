@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.card.mapper.CardTransactionMapper">
+
+    <!-- 카드 승인 내역 저장 -->
+    <insert id="insert" parameterType="com.savit.card.domain.CardTransactionVO">
+        INSERT INTO CardTransaction (
+        card_id,
+        res_card_no,
+        res_used_date,
+        res_used_time,
+        res_used_amount,
+        res_cancel_yn,
+        res_cancel_amount,
+        res_total_amount,
+        budget_category_id,
+        category_id,
+        res_member_store_name,
+        res_member_store_type,
+        created_at,
+        updated_at
+        )
+        VALUES (
+        #{cardId},
+        #{resCardNo},
+        #{resUsedDate},
+        #{resUsedTime},
+        #{resUsedAmount},
+        #{resCancelYn},
+        #{resCancelAmount},
+        #{resTotalAmount},
+        #{budgetCategoryId},
+        #{categoryId},
+        #{resMemberStoreName},
+        #{resMemberStoreType},
+        NOW(),
+        NOW()
+        )
+    </insert>
+
+    <!-- 카테고리 미분류 자동 분류 -->
+    <select id="findUnclassifiedTransactions" resultType="com.savit.card.domain.CardTransactionVO">
+        SELECT * FROM CardTransaction WHERE category_id IS NULL
+    </select>
+
+    <update id="updateCategory">
+        UPDATE CardTransaction
+        SET category_id = #{categoryId},
+            res_member_store_type = #{resMemberStoreType},
+            updated_at = NOW()
+        WHERE id = #{transactionId}
+    </update>
+
+</mapper>
