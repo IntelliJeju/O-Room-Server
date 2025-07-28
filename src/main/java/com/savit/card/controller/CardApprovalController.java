@@ -73,7 +73,6 @@ public class CardApprovalController {
     }
 
     /**
-     *
      * @param request
      * @return 사용자 보유카드 전체 승인내역 한번에 조회(DB에 중복 제외 업데이트 가능)
      */
