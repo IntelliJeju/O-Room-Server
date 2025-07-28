@@ -23,4 +23,11 @@ public interface CardApprovalMapper {
      * @param approvals 저장할 승인 내역 리스트
      */
     void insertApprovals(@Param("approvals") List<CardApproval> approvals);
+
+    /**
+     * DB에 있는 승인내역 출력
+     * @param userId 사용자 ID
+     * @param cardId 조회할 카드 ID
+     */
+    List<CardApproval> findApprovalsByCardId(@Param("userId") Long userId, @Param("cardId") Long cardId);
 }
