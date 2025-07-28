@@ -16,7 +16,8 @@
         res_card_type,
         res_sleep_yn,
         registered_at,
-        user_id
+        user_id,
+        res_image_link
         )
         VALUES
         <foreach collection="cards" item="card" separator=",">
@@ -31,7 +32,8 @@
             #{card.resCardType},
             #{card.resSleepYn},
             #{card.registeredAt},
-            #{card.userId}
+            #{card.userId},
+            #{card.resImageLink}
             )
         </foreach>
     </insert>

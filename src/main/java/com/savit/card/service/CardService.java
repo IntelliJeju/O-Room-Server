@@ -110,18 +110,6 @@ public class CardService {
                           Long userId,
                           String encryptedCardNo,
                           String cardPassword) {
-// 여기부터
-        for (Map<String, Object> data : cardDataList) {
-            log.info("CODEF 카드 데이터: {}", data);  // 전체 응답 확인
-
-            String cardName = (String) data.get("resCardName");
-            if (cardName == null) {
-                log.warn("⚠️ 카드 이름이 누락된 항목입니다: {}", data);
-            } else {
-                log.info("✅ 카드 이름: {}", cardName);
-            }
-        }
-        // 여기까지
 
         List<Card> cards = cardDataList.stream().map(data -> Card.builder()
                         .connectedId(connectedId)
@@ -139,6 +127,7 @@ public class CardService {
                         .cardPassword(codefUtil.encryptRSA(cardPassword))
                         .registeredAt(LocalDateTime.now())
                         .userId(userId)
+                        .resImageLink((String) data.get("resImageLink"))
                         .build())
                 .toList();
 

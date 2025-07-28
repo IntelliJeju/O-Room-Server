@@ -9,11 +9,13 @@ public class CardDetailResponseDTO {
     private String cardName;
     private String resCardNo;
     private int usageAmount;
+    private String resImageLink;
 
     public CardDetailResponseDTO(Card card, int usageAmount) {
         this.cardId = card.getId();
         this.cardName = card.getCardName();
         this.resCardNo = card.getResCardNo();
         this.usageAmount = usageAmount;
+        this.resImageLink = card.getResImageLink();
     }
 }
