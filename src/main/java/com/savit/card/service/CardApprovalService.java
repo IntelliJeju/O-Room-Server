@@ -3,7 +3,10 @@ package com.savit.card.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.savit.card.domain.CardApproval;
 import com.savit.card.dto.ApprovalApiDataDTO;
+import com.savit.card.dto.DashboardDTO;
 import com.savit.card.mapper.CardApprovalMapper;
+import com.savit.budget.service.BudgetService;
+import com.savit.budget.domain.BudgetVO;
 import com.savit.card.util.CodefUtil;
 import io.codef.api.EasyCodef;
 import io.codef.api.EasyCodefServiceType;
@@ -13,12 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,6 +35,7 @@ public class CardApprovalService {
     private final CardApprovalMapper cardApprovalMapper;
     private final CodefTokenService codefTokenService;
     private final CodefUtil codefUtil;
+    private final BudgetService budgetService;
 //    private final ObjectMapper objectMapper;
 
     @Transactional
@@ -48,32 +55,96 @@ public class CardApprovalService {
         List<Map<String, Object>> approvalDataList = callApprovalHistoryApi(apiData);
         log.info("Codef API 호출 완료 - 조회된 승인내역 수: {}", approvalDataList.size());
 
-        // 3. 응답 결과를 CardApproval 도메인 객체로 변환
-        List<CardApproval> approvals = approvalDataList.stream()
-                .map(data -> CardApproval.builder()
-                        .cardId(cardId)
-                        .budgetCategoryId(null) // Foreign Key 제약조건 회피를 위해 임시로 NULL 설정
-                        .categoryId(null) // TODO: 가맹점 업종에 따른 카테고리 매핑 로직 필요
-                        .resCardNo((String) data.get("resCardNo"))
-                        .resUsedDate((String) data.get("resUsedDate"))
-                        .resUsedTime((String) data.get("resUsedTime"))
-                        .resUsedAmount((String) data.get("resUsedAmount"))
-                        .resCancelYN((String) data.get("resCancelYN"))
-                        .resCancelAmount((String) data.get("resCancelAmount"))
-                        .resTotalAmount((String) data.get("resTotalAmount"))
-                        .resMemberStoreName((String) data.get("resMemberStoreName"))
-                        .resMemberStoreType((String) data.get("resMemberStoreType"))
-                        .createdAt(LocalDateTime.now())
-                        .updatedAt(LocalDateTime.now())
-                        .build())
+//
+        // 3. 기존 승인내역 조회
+        List<CardApproval> existingApprovals = cardApprovalMapper.findApprovalsByCardId(userId, cardId);
+
+        // 4. 기존 승인내역을 식별 가능한 키로 Set에 저장
+        Set<String> existingKeys = existingApprovals.stream()
+                .map(this::generateUniqueKey)
+                .collect(Collectors.toSet());
+
+        // 5. 새로 가져온 승인 데이터 중 기존에 없는 것만 필터링
+        log.info("기존 승인내역 수: {}, 고유 키 수: {}",
+                existingApprovals.size(), existingKeys.size());
+
+        // 5. 새로 가져온 승인 데이터 처리
+        List<CardApproval> newApprovals = approvalDataList.stream()
+                .map(data -> {
+                    CardApproval approval = CardApproval.builder()
+                            .cardId(cardId)
+                            .budgetCategoryId(null)
+                            .categoryId(null)
+                            .resCardNo((String) data.get("resCardNo"))
+                            .resUsedDate((String) data.get("resUsedDate"))
+                            .resUsedTime((String) data.get("resUsedTime"))
+                            .resUsedAmount((String)
+                                    data.get("resUsedAmount"))
+                            .resCancelYN((String) data.get("resCancelYN"))
+                            .resCancelAmount((String)
+                                    data.get("resCancelAmount"))
+                            .resTotalAmount((String)
+                                    data.get("resTotalAmount"))
+                            .resMemberStoreName((String)
+                                    data.get("resMemberStoreName"))
+                            .resMemberStoreType((String)
+                                    data.get("resMemberStoreType"))
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build();
+
+                    log.debug("처리 중인 승인내역 키: {}",
+                            generateUniqueKey(approval));
+                    return approval;
+                })
+                .filter(approval -> {
+                    String key = generateUniqueKey(approval);
+                    boolean isNew = !existingKeys.contains(key);
+                    if (!isNew) {
+                        log.debug("중복 건너뛰기: {}", key);
+                    }
+                    return isNew;
+                })
                 .collect(Collectors.toList());
 
-        // 4. 변환된 승인 내역을 DB에 저장
-        if (!approvals.isEmpty()) {
-            cardApprovalMapper.insertApprovals(approvals);
+        log.info("새로 저장할 승인내역 수: {}", newApprovals.size());
+
+        // 6. 새로운 승인내역만 저장
+        if (!newApprovals.isEmpty()) {
+            cardApprovalMapper.insertApprovals(newApprovals);
+            log.info("새 승인내역 저장 완료: {}건", newApprovals.size());
+        } else {
+            log.info("저장할 새 승인내역이 없습니다.");
         }
 
-        return approvals;
+        return newApprovals;
+    }
+
+    public void fetchAndSaveAllCards(Long userId) {
+        List<Long> cardIds = cardApprovalMapper.findCardIdsByUser(userId); // 사용자 카드 전체 조회
+        for (Long cardId : cardIds) {
+            try {
+                fetchAndSaveApprovals(userId, cardId);
+            } catch (Exception e) {
+                log.error("카드 {} 처리 중 오류", cardId, e);
+            }
+        }
+    }
+
+    // 안전한 고유 키 생성 메서드
+    private String generateUniqueKey(CardApproval approval) {
+        return String.format("%s_%s_%s_%s_%s",
+                safeString(approval.getResCardNo()),
+                safeString(approval.getResUsedDate()),
+                safeString(approval.getResUsedTime()),
+                safeString(approval.getResUsedAmount()),
+                safeString(approval.getResMemberStoreName()) // 가맹점명으로 더 정확한 식별
+        );
+    }
+
+    // null 안전 문자열 변환
+    private String safeString(String value) {
+        return value != null ? value : "NULL";
     }
 
     // 승인내역 API 호출
@@ -85,7 +156,8 @@ public class CardApprovalService {
 
         // 조회 기간 설정 (1개월전부터 오늘까지) - 성능 향상을 위해 단축
         LocalDate end = LocalDate.now();
-        LocalDate start = end.minusMonths(1);
+        // 이전달 1일 부터 가져오게끔 수정
+        LocalDate start = end.minusMonths(1).withDayOfMonth(1);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
         // API 파라미터 설정
@@ -133,5 +205,96 @@ public class CardApprovalService {
     // DB에 저장된 승인내역 보기
     public List<CardApproval> getApprovalHistory(Long userId, Long cardId) {
         return cardApprovalMapper.findApprovalsByCardId(userId, cardId);
+    }
+
+    // 메인 대시보드 데이터 조회 (Budget 연계)
+    public DashboardDTO getDashboardData(Long userId) {
+        LocalDate now = LocalDate.now();
+        String currentMonth =
+                now.format(DateTimeFormatter.ofPattern("yyyyMM"));
+        String lastMonth =
+                now.minusMonths(1).format(DateTimeFormatter.ofPattern("yyyyMM"));
+
+        // 1. Budget에서 사용자 예산 정보 조회
+        BudgetVO budget = budgetService.getBudget(userId);
+
+        // 2. 이번달/저번달 사용금액 계산
+        BigDecimal thisMonthUsage = calculateMonthlyUsage(userId,
+                currentMonth);
+        BigDecimal lastMonthUsage = calculateMonthlyUsage(userId, lastMonth);
+
+        // 3. 예산이 설정되어 있는 경우 계산
+        BigDecimal totalBudget = BigDecimal.ZERO;
+        BigDecimal remainingBudget = BigDecimal.ZERO;
+        BigDecimal usageRate = BigDecimal.ZERO;
+        boolean hasBudget = false;
+        boolean isOverBudget = false;
+
+        if (budget != null && budget.getTotalBudget() != null) {
+            hasBudget = true;
+            totalBudget = budget.getTotalBudget()
+                    .divide(BigDecimal.TEN, 0, RoundingMode.DOWN)
+                    .multiply(BigDecimal.TEN);
+            remainingBudget = totalBudget.subtract(thisMonthUsage);
+            usageRate = totalBudget.compareTo(BigDecimal.ZERO) > 0 ?
+                    thisMonthUsage.divide(totalBudget, 4,
+                            RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100))
+                            .setScale(0, RoundingMode.HALF_UP)
+                    : BigDecimal.ZERO;
+            isOverBudget = thisMonthUsage.compareTo(totalBudget) > 0;
+        }
+
+        // 4. 일평균 사용금액 계산  1의자리 버림, 소수점 없앰, 10원단위 절삭값으로
+        int daysPassed = now.getDayOfMonth();
+        BigDecimal dailyAverage = daysPassed > 0
+                ? thisMonthUsage
+                .divide(BigDecimal.valueOf(daysPassed), 2, RoundingMode.HALF_UP) // 1. 일평균 계산
+                .divide(BigDecimal.TEN, 0, RoundingMode.DOWN)                    // 2. 10으로 나눈 후 소수점 이하 및 1의 자리 제거
+                .multiply(BigDecimal.TEN)                                       // 3. 다시 10을 곱해 10원 단위로 환산
+                : BigDecimal.ZERO;
+
+        return DashboardDTO.builder()
+                .budgetMonth(budget != null ? budget.getMonth() : null)
+                .totalBudget(totalBudget)
+                .thisMonthUsage(thisMonthUsage)
+                .lastMonthUsage(lastMonthUsage)
+                .remainingBudget(remainingBudget)
+                .usageRate(usageRate)
+                .dailyAverage(dailyAverage)
+                .currentMonth(currentMonth)
+                .daysInMonth(now.lengthOfMonth())
+                .daysPassed(daysPassed)
+                .hasBudget(hasBudget)
+                .isOverBudget(isOverBudget)
+                .build();
+    }
+
+    // 특정 월의 총 사용금액 계산
+    private BigDecimal calculateMonthlyUsage(Long userId, String month) {
+        List<CardApproval> monthlyApprovals =
+                cardApprovalMapper.findThisMonthApprovalsByUser(userId, month);
+
+        BigDecimal totalUsage = BigDecimal.ZERO;
+
+        for (CardApproval approval : monthlyApprovals) {
+            if (approval.getResUsedAmount() != null) {
+                BigDecimal usedAmount = new
+                        BigDecimal(approval.getResUsedAmount());
+
+                // 취소된 거래는 차감
+                if ("1".equals(approval.getResCancelYN()) &&
+                        approval.getResCancelAmount() != null) {
+                    BigDecimal canceled = new
+                            BigDecimal(approval.getResCancelAmount());
+                    usedAmount = usedAmount.subtract(canceled);
+                }
+
+                totalUsage = totalUsage.add(usedAmount);
+            }
+        }
+
+        return totalUsage
+                .divide(BigDecimal.TEN, 0, RoundingMode.DOWN)
+                .multiply(BigDecimal.TEN);
     }
 }
