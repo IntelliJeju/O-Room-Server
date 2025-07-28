@@ -38,4 +38,19 @@ public class CardApprovalController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/{cardId}/approvals")
+    public ResponseEntity<?> getCardApprovalHistory(
+            @PathVariable Long cardId,
+            HttpServletRequest request) {
+        try {
+            Long userId = jwtUtil.getUserIdFromToken(request);
+            List<CardApproval> approvals = cardApprovalService.getApprovalHistory(userId, cardId);
+            return ResponseEntity.ok(approvals);
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }
