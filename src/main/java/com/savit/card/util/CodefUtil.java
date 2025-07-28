@@ -28,9 +28,9 @@ import java.util.Base64;
 @Component
 public class CodefUtil {
 
-    @Value("${codef.client-id}")     private String clientId;
+    @Value("${codef.client-id}") private String clientId;
     @Value("${codef.client-secret}") private String clientSecret;
-    @Value("${codef.public-key}")    private String publicKey;
+    @Value("${codef.public-key}") private String publicKey;
 
     public EasyCodef newClient() {
         log.info("[CODEF] clientId = {}", clientId);
@@ -51,33 +51,5 @@ public class CodefUtil {
             log.error("RSA 암호화 실패 – 입력=[{}]", plainText, e);
             throw new IllegalStateException("CODEF RSA 암호화 중 오류가 발생했습니다.", e);
         }
-    }
-
-    public String decryptRSA(String encryptedText) {
-        try {
-            PrivateKey privateKey = getPrivateKey();
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, privateKey);
-            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
-            return new String(decryptedBytes, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new RuntimeException("RSA 복호화 실패", e);
-        }
-    }
-
-    public PrivateKey getPrivateKey() throws Exception {
-        ClassPathResource resource = new ClassPathResource("private-key.pem");
-        String privateKeyPem = new String(Files.readAllBytes(resource.getFile().toPath()), StandardCharsets.UTF_8);
-
-        String privateKeyPEM = privateKeyPem
-                .replace("-----BEGIN PRIVATE KEY-----", "")
-                .replace("-----END PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
-
-        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM);
-
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        return keyFactory.generatePrivate(keySpec);
     }
 }
