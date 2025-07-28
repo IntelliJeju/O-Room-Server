@@ -1,6 +1,6 @@
 package com.savit.card;
 
-import com.savit.card.dto.CardRegisterRequest;
+import com.savit.card.dto.CardRegisterRequestDTO;
 import com.savit.card.mapper.CardMapper;
 import com.savit.card.service.CardService;
 import com.savit.card.service.CodefTokenService;
@@ -34,7 +34,7 @@ class CardServiceTest {
 
     @Test
     void registerAccount_정상응답_connectedId_반환() throws Exception {
-        CardRegisterRequest req = new CardRegisterRequest();
+        CardRegisterRequestDTO req = new CardRegisterRequestDTO();
         req.setLoginId("testId");
         req.setLoginPw("testPw");
         req.setBirthDate("19900101");
@@ -56,7 +56,7 @@ class CardServiceTest {
 
     @Test
     void registerAccount_connectedId없을경우_예외발생() throws Exception {
-        CardRegisterRequest req = new CardRegisterRequest();
+        CardRegisterRequestDTO req = new CardRegisterRequestDTO();
         req.setLoginId("id");
         req.setLoginPw("pw");
         req.setBirthDate("19900101");

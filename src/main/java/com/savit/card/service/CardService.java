@@ -2,7 +2,8 @@ package com.savit.card.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.savit.card.domain.Card;
-import com.savit.card.dto.CardRegisterRequest;
+import com.savit.card.dto.CardDetailResponseDTO;
+import com.savit.card.dto.CardRegisterRequestDTO;
 import com.savit.card.mapper.CardMapper;
 import com.savit.card.util.CodefUtil;
 import io.codef.api.EasyCodef;
@@ -26,7 +27,7 @@ public class CardService {
     private final CodefUtil codefUtil;
     private final CardMapper cardMapper;
 
-    public String registerAccount(CardRegisterRequest req) throws Exception {
+    public String registerAccount(CardRegisterRequestDTO req) throws Exception {
 
         String accessToken = codefTokenService.getAccessToken();
 
@@ -109,6 +110,18 @@ public class CardService {
                           Long userId,
                           String encryptedCardNo,
                           String cardPassword) {
+// 여기부터
+        for (Map<String, Object> data : cardDataList) {
+            log.info("CODEF 카드 데이터: {}", data);  // 전체 응답 확인
+
+            String cardName = (String) data.get("resCardName");
+            if (cardName == null) {
+                log.warn("⚠️ 카드 이름이 누락된 항목입니다: {}", data);
+            } else {
+                log.info("✅ 카드 이름: {}", cardName);
+            }
+        }
+        // 여기까지
 
         List<Card> cards = cardDataList.stream().map(data -> Card.builder()
                         .connectedId(connectedId)
@@ -130,5 +143,14 @@ public class CardService {
                 .toList();
 
         cardMapper.insertCards(cards);
+    }
+
+    public CardDetailResponseDTO getCardDetailWithUsage(Long cardId, Long userId) {
+        Card card = cardMapper.selectCardByIdAndUserId(cardId, userId);
+        if (card == null) throw new IllegalArgumentException("카드를 찾을 수 없습니다.");
+
+        int usageAmount = cardMapper.selectMonthlyUsageAmount(cardId);
+
+        return new CardDetailResponseDTO(card, usageAmount);
     }
 }
