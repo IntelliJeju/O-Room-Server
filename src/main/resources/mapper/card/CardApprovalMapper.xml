@@ -65,4 +65,10 @@
         </foreach>
     </insert>
 
+    <select id="findApprovalsByCardId" resultType="com.savit.card.domain.CardApproval">
+        SELECT * FROM CardTransaction
+        WHERE card_id = #{cardId}
+        ORDER BY res_used_date DESC, res_used_time DESC
+    </select>
+
 </mapper>
