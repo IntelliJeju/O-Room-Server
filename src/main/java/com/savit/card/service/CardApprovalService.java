@@ -129,4 +129,9 @@ public class CardApprovalService {
             throw new IllegalStateException("카드 승인내역 조회에 실패했습니다. 응답: " + resp);
         }
     }
+
+    // DB에 저장된 승인내역 보기
+    public List<CardApproval> getApprovalHistory(Long userId, Long cardId) {
+        return cardApprovalMapper.findApprovalsByCardId(userId, cardId);
+    }
 }
