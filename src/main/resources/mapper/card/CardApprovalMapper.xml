@@ -65,4 +65,26 @@
         </foreach>
     </insert>
 
+    <select id="findApprovalsByCardId" resultType="com.savit.card.domain.CardApproval">
+        SELECT * FROM CardTransaction
+        WHERE card_id = #{cardId}
+        ORDER BY res_used_date DESC, res_used_time DESC
+    </select>
+
+    <select id="findThisMonthApprovalsByUser"
+            resultType="com.savit.card.domain.CardApproval">
+        SELECT ct.* FROM CardTransaction ct
+                             JOIN Card c ON ct.card_id = c.id
+        WHERE c.user_id = #{userId}
+          AND DATE_FORMAT(STR_TO_DATE(ct.res_used_date, '%Y%m%d'), '%Y%m') =
+              #{month}
+        ORDER BY ct.res_used_date DESC, ct.res_used_time DESC
+    </select>
+
+    <select id="findCardIdsByUser" resultType="long" parameterType="long">
+        SELECT id
+        FROM Card
+        WHERE user_id = #{userId}
+    </select>
+
 </mapper>
