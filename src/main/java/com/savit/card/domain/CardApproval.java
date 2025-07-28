@@ -3,11 +3,13 @@ package com.savit.card.domain;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class CardApproval {
     // 기본 ID
