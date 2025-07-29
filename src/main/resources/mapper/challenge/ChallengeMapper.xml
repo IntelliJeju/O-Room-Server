@@ -1,0 +1,13 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.challenge.mapper.ChallengeMapper">
+
+    <!--이번주 일요일 까지 참여가능 챌린지들 보여주기 - 챌린지 메인 페이지 -->
+    <select id="getChallengeList" resultType="com.savit.challenge.dto.ChallengeListDTO">
+        select ch.title, ch.start_date, ch.end_date, c.name AS categoryName
+        from challenge as ch
+                 inner join category as c on ch.category_id = c.id
+        where ch.start_date between current_date() AND current_date() + interval (7 - dayofweek(curdate())) day
+        order by ch.start_date asc
+    </select>
+</mapper>
