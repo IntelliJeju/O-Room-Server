@@ -16,7 +16,8 @@
         res_card_type,
         res_sleep_yn,
         registered_at,
-        user_id
+        user_id,
+        res_image_link
         )
         VALUES
         <foreach collection="cards" item="card" separator=",">
@@ -31,8 +32,23 @@
             #{card.resCardType},
             #{card.resSleepYn},
             #{card.registeredAt},
-            #{card.userId}
+            #{card.userId},
+            #{card.resImageLink}
             )
         </foreach>
     </insert>
+
+    <select id="selectCardByIdAndUserId" resultType="com.savit.card.domain.Card">
+        SELECT * FROM Card
+        WHERE id = #{cardId}
+          AND user_id = #{userId}
+    </select>
+
+    <select id="selectMonthlyUsageAmount" resultType="int">
+        SELECT COALESCE(SUM(CAST(res_used_amount AS UNSIGNED)), 0)
+        FROM CardTransaction
+        WHERE card_id = #{cardId}
+          AND res_cancel_yn = '0'
+          AND res_used_date LIKE CONCAT(DATE_FORMAT(NOW(), '%Y%m'), '%')
+    </select>
 </mapper>

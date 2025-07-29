@@ -1,9 +1,11 @@
 package com.savit.card.dto;
 
-import lombok.Data;
+import lombok.*;
 
-@Data
-public class CardRegisterRequest {
+@Getter
+@Setter
+@NoArgsConstructor
+public class CardRegisterRequestDTO {
     private String organization;
     private String loginId;
     private String loginPw;
