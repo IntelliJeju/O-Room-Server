@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @ToString(exclude = {"cardPassword", "encryptedCardNo"})
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Card {
 
