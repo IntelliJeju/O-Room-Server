@@ -77,7 +77,7 @@ public class CardService {
         params.put("connectedId", connectedId);
         params.put("organization", organization);
         params.put("birthDate", birthDate);
-        params.put("inquiryType", "0");
+        params.put("inquiryType", "1");
 
         String resp = client.requestProduct(
                 "/v1/kr/card/p/account/card-list",
