@@ -24,7 +24,7 @@
         UPDATE CardTransaction
         SET category_id = #{categoryId},
             res_member_store_type = #{resMemberStoreType},
-            updated_at = NOW()
+            updated_at = NOW()git p
         WHERE id = #{transactionId}
     </update>
 
