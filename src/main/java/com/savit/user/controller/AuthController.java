@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.URLEncoder;
 
 @Controller
@@ -40,48 +41,61 @@ public class AuthController {
     }
 
     @GetMapping("/login/kakao")
-    @ResponseBody
-    public ResponseEntity<?> kakaoCallback(
+    public void kakaoCallback(
             @RequestParam(required = false) String code,
             @RequestParam(required = false) String error,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws IOException {
 
-        log.info("카카오 콜백 호출됨. code: {}, error: {}", code, error);
+        log.info("카카오 콜백 호출됨. code={}, error={}", code, error);
 
         // 에러 처리
         if (error != null) {
             log.error("카카오 인증 에러: {}", error);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("카카오 인증이 취소되었습니다.");
+            String errorUrl = "http://localhost:5173/auth/error?message=" +
+                    URLEncoder.encode("카카오 인증이 취소되었습니다.", "UTF-8");
+            response.sendRedirect(errorUrl);
+            return;
         }
 
         // code 파라미터 체크
         if (code == null || code.trim().isEmpty()) {
             log.error("인가 코드가 없습니다.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("인가 코드가 필요합니다.");
+            String errorUrl = "http://localhost:5173/auth/error?message=" +
+                    URLEncoder.encode("인가 코드가 필요합니다.", "UTF-8");
+            response.sendRedirect(errorUrl);
+            return;
         }
 
         try {
-            log.info("=== 카카오 로그인 처리 시작 ===");
+            log.info("======= 카카오 로그인 처리 시작 ========");
 
             // 카카오 로그인 처리
             LoginResponseDTO loginResponse = authService.kakaoLogin(code);
 
-            log.info("=== 카카오 로그인 처리 완료 ===");
+            log.info("======== 카카오 로그인 처리 완료 ==========");
+            log.info("accessToken = {}", loginResponse.getAccessToken());
 
-            // Access Token을 헤더에 설정 (기존 호환성)
-            response.setHeader("Authorization", "Bearer " + loginResponse.getAccessToken());
+            // 성공 시 프론트엔드로 리다이렉트 (토큰 포함)
+            String redirectUrl = "http://localhost:8080/auth/login/callback" +
+                    "?accessToken=" + URLEncoder.encode(loginResponse.getAccessToken(), "UTF-8") +
+                    "&refreshToken=" + URLEncoder.encode(loginResponse.getRefreshToken(), "UTF-8");
+
+            response.sendRedirect(redirectUrl);
 
             log.info("카카오 로그인 성공. 사용자: {}", loginResponse.getUser().getEmail());
 
-            return ResponseEntity.ok(loginResponse);
         } catch (Exception e) {
-            log.error("카카오 로그인 처리 실패 - 상세 오류:", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("로그인 처리 중 오류가 발생했습니다: " + e.getMessage());
+            log.error("카카오 로그인 처리 실패", e);
+            try {
+                String errorUrl = "http://localhost:5173/auth/error?message=" +
+                        URLEncoder.encode("로그인 처리 중 오류가 발생했습니다.", "UTF-8");
+                response.sendRedirect(errorUrl);
+            } catch (IOException ioException) {
+                log.error("에러 페이지 리다이렉트 실패", ioException);
+            }
         }
     }
+
 
     /**
      * Refresh Token으로 Access Token 갱신
