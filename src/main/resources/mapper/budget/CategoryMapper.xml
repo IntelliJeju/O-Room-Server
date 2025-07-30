@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.budget.mapper.CategoryMapper">
+
+    <select id="findById" parameterType="long" resultType="com.savit.budget.domain.CategoryVO">
+        SELECT * FROM category WHERE id = #{id}
+    </select>
+
+    <select id="findByName" parameterType="string" resultType="com.savit.budget.domain.CategoryVO">
+        SELECT * FROM category WHERE name = #{name}
+    </select>
+
+</mapper>
