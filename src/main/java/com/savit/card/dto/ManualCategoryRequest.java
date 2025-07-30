@@ -9,4 +9,5 @@ import lombok.Data;
 public class ManualCategoryRequest {
     private Long transactionId; // 수정할 거래 내역의 ID
     private Long categoryId;      // 사용자가 선택한 카테고리 ID
+    private Long userId;
 }

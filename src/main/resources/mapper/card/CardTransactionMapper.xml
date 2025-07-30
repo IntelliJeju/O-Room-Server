@@ -5,47 +5,21 @@
 
 <mapper namespace="com.savit.card.mapper.CardTransactionMapper">
 
-    <!-- 카드 승인 내역 저장 -->
-    <insert id="insert" parameterType="com.savit.card.domain.CardTransactionVO">
-        INSERT INTO CardTransaction (
-        card_id,
-        res_card_no,
-        res_used_date,
-        res_used_time,
-        res_used_amount,
-        res_cancel_yn,
-        res_cancel_amount,
-        res_total_amount,
-        budget_category_id,
-        category_id,
-        res_member_store_name,
-        res_member_store_type,
-        created_at,
-        updated_at
-        )
-        VALUES (
-        #{cardId},
-        #{resCardNo},
-        #{resUsedDate},
-        #{resUsedTime},
-        #{resUsedAmount},
-        #{resCancelYn},
-        #{resCancelAmount},
-        #{resTotalAmount},
-        #{budgetCategoryId},
-        #{categoryId},
-        #{resMemberStoreName},
-        #{resMemberStoreType},
-        NOW(),
-        NOW()
-        )
-    </insert>
-
-    <!-- 카테고리 미분류 자동 분류 -->
+    <!-- 전체 사용자 기준 미분류 거래 조회 -->
     <select id="findUnclassifiedTransactions" resultType="com.savit.card.domain.CardTransactionVO">
         SELECT * FROM CardTransaction WHERE category_id IS NULL
     </select>
 
+    <!-- 특정 사용자 기준 미분류 거래 조회 -->
+    <select id="findUnclassifiedTransactionsByUser" resultType="com.savit.card.domain.CardTransactionVO">
+        SELECT t.*
+        FROM CardTransaction t
+                 JOIN Card c ON t.card_id = c.id
+        WHERE t.category_id IS NULL
+          AND c.user_id = #{userId}
+    </select>
+
+    <!-- 거래의 카테고리 업데이트 -->
     <update id="updateCategory">
         UPDATE CardTransaction
         SET category_id = #{categoryId},
@@ -53,5 +27,27 @@
             updated_at = NOW()
         WHERE id = #{transactionId}
     </update>
+
+    <!-- 카드ID + 날짜 + 시간 + 사용자 기준 거래 ID 조회 -->
+    <select id="findTransactionIdByCardIdAndDateTime" resultType="long">
+        SELECT t.id
+        FROM CardTransaction t
+                 JOIN Card c ON t.card_id = c.id
+        WHERE c.user_id = #{userId}
+          AND t.card_id = #{cardId}
+          AND t.res_used_date = #{resUsedDate}
+          AND t.res_used_time = #{resUsedTime}
+    </select>
+
+    <!-- 해당 거래가 사용자 소유인지 여부 검증 -->
+    <select id="isOwnedByUser" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM CardTransaction t
+                     JOIN Card c ON t.card_id = c.id
+            WHERE t.id = #{transactionId}
+              AND c.user_id = #{userId}
+        )
+    </select>
 
 </mapper>

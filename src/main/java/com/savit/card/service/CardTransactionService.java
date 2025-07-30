@@ -21,49 +21,79 @@ public class CardTransactionService {
     private final CardTransactionMapper cardTransactionMapper;
     private final CategoryMapper categoryMapper;
 
-    private static final Map<String, List<String>> NAME_KEYWORDS = Map.of(
-            "식비", List.of("배달의민족", "요기요", "맘스터치", "김밥", "한솥"),
-            "카페/간식", List.of("스타벅스", "이디야", "컴포즈", "투썸", "커피", "베스킨"),
-            "교통", List.of("택시", "온다", "버스", "지하철", "티머니"),
-            "패션/쇼핑", List.of("쿠팡", "11번가", "g마켓", "네이버파이낸셜"),
-            "생활", List.of("GS25", "CU", "세븐일레븐", "이마트24", "다이소"),
-            "유흥", List.of("술집", "호프", "포차", "맥주", "노래방"),
-            "문화/여가", List.of("CGV", "메가박스", "롯데시네마", "예술의전당", "인터파크")
+    private static final Map<String, List<String>> NAME_KEYWORDS = Map.ofEntries(
+            Map.entry("식당", List.of("김밥", "한솥", "맘스터치", "본죽", "삼겹살", "국밥", "쌀국수", "고기", "마라탕", "우동", "돈까스", "비빔밥", "분식")),
+            Map.entry("카페", List.of("스타벅스", "이디야", "컴포즈", "투썸", "커피", "베스킨", "메가커피", "폴바셋", "할리스", "블루보틀")),
+            Map.entry("배달", List.of("배달의민족", "요기요", "쿠팡이츠", "땡겨요", "배달앱", "배달전문", "배민")),
+            Map.entry("대중교통", List.of("버스", "지하철", "티머니", "교통카드", "환승", "대중교통")),
+            Map.entry("택시", List.of("카카오택시", "타다", "마카롱택시", "온다", "우버", "택시")),
+            Map.entry("통신비", List.of("SKT", "KT", "LGU+", "알뜰폰", "요금", "통신사")),
+            Map.entry("공과금", List.of("전기", "수도", "도시가스", "지역난방", "공공요금", "한전")),
+            Map.entry("편의점/마트", List.of("GS25", "CU", "세븐일레븐", "이마트24", "다이소", "홈플러스", "롯데마트", "이마트", "마트")),
+            Map.entry("공연", List.of("예술의전당", "뮤지컬", "콘서트", "연극", "공연", "티켓링크", "인터파크티켓")),
+            Map.entry("쇼핑", List.of("쿠팡", "11번가", "지마켓", "G마켓", "SSG", "롯데ON", "네이버쇼핑", "마켓컬리")),
+            Map.entry("유흥", List.of("술집", "호프", "포차", "맥주", "노래방", "주점")),
+            Map.entry("의료비", List.of("병원", "약국", "치과", "한의원", "병원비", "이비인후과", "내과", "안과", "정형외과", "피부과", "정신과", "의원")),
+            Map.entry("교육", List.of("학원", "온라인강의", "인강", "과외", "교육비", "수강료", "토익", "자격증", "공부")),
+            Map.entry("정기구독", List.of("넷플릭스", "디즈니플러스", "왓챠", "유튜브프리미엄", "멜론", "벅스", "지니뮤직", "정기결제", "구독", "openai", "gpt", "youtube")),
+            Map.entry("영화", List.of("CGV", "메가박스", "롯데시네마", "영화관", "영화티켓", "무비", "시네마"))
     );
+
 
     private static final Map<String, String> SAFE_STORE_TYPE_MAPPING = Map.of(
-            "택시", "교통",
-            "버스", "교통",
-            "지하철", "교통",
-            "편의점", "생활"
+            "택시", "택시",
+            "버스", "대중교통",
+            "지하철", "대중교통",
+            "편의점", "편의점/마트",
+            "병원", "의료비",
+            "학원", "교육",
+            "넷플릭스", "정기구독",
+            "CGV", "영화"
     );
 
-    // 카드 승인 내역 저장 후 자동 분류
-    public void save(CardTransactionDto dto) {
+    /**
+     * 카드 승인 내역에 대해 카테고리를 자동 분류하여 업데이트
+     * Codef API로 이미 저장된 승인 내역에 대해 실행되며,
+     * cardId + 사용일자 + 사용시간 기준으로 해당 거래를 찾아 category/budget_category를 update 함
+     */
+    public void autoClassifyTransaction(CardTransactionDto dto) {
+        Long userId = dto.getUserId();
         CategoryVO category = classifyCategory(dto.getResMemberStoreName(), dto.getResMemberStoreType());
 
-        CardTransactionVO vo = buildTransaction(dto);
-        vo.setCategoryId(category.getId());
-        vo.setBudgetCategoryId(category.getId());
-        vo.setResMemberStoreType(category.getName());
+        Long transactionId = cardTransactionMapper.findTransactionIdByCardIdAndDateTime(
+                userId, dto.getCardId(), dto.getResUsedDate(), dto.getResUsedTime()
+        );
 
-        cardTransactionMapper.insert(vo);
+        if (transactionId == null) {
+            log.warn("해당 승인내역을 찾을 수 없습니다. userId={}, cardId={}, date={}, time={}",
+                    userId, dto.getCardId(), dto.getResUsedDate(), dto.getResUsedTime());
+            return;
+        }
+
+        cardTransactionMapper.updateCategory(transactionId, category.getId(), category.getName());
     }
 
     // 수동 카테고리 지정
     public void updateCategory(ManualCategoryRequest req) {
+        Long userId = req.getUserId();
+        Long transactionId = req.getTransactionId();
         Long categoryId = req.getCategoryId();
+
+        if (!cardTransactionMapper.isOwnedByUser(transactionId, userId)) {
+            throw new SecurityException("해당 거래는 사용자 소유가 아닙니다.");
+        }
+
         CategoryVO category = categoryMapper.findById(categoryId);
         if (category == null) {
             throw new IllegalArgumentException("해당 카테고리 ID를 찾을 수 없습니다: " + categoryId);
         }
 
-        cardTransactionMapper.updateCategory(req.getTransactionId(), categoryId, category.getName());
+        cardTransactionMapper.updateCategory(transactionId, categoryId, category.getName());
     }
 
     // 자동 재분류
-    public int reclassifyUncategorizedTransactions() {
-        List<CardTransactionVO> transactions = cardTransactionMapper.findUnclassifiedTransactions();
+    public int reclassifyUncategorizedTransactions(Long userId) {
+        List<CardTransactionVO> transactions = cardTransactionMapper.findUnclassifiedTransactionsByUser(userId);
         int updatedCount = 0;
 
         for (CardTransactionVO tx : transactions) {
@@ -78,6 +108,7 @@ public class CardTransactionService {
 
         return updatedCount;
     }
+
 
     // 분류 로직
     private CategoryVO classifyCategory(String storeName, String storeType) {
@@ -115,17 +146,5 @@ public class CardTransactionService {
     // 상호명 전처리
     private String normalize(String text) {
         return text.replaceAll("[^가-힣a-zA-Z0-9]", "").toLowerCase();
-    }
-
-    // DTO → VO 변환
-    private CardTransactionVO buildTransaction(CardTransactionDto dto) {
-        CardTransactionVO vo = new CardTransactionVO();
-        vo.setCardId(dto.getCardId());
-        vo.setResMemberStoreName(dto.getResMemberStoreName());
-        vo.setResUsedAmount(dto.getResUsedAmount());
-        vo.setResUsedDate(dto.getResUsedDate());
-        vo.setResUsedTime(dto.getResUsedTime());
-        vo.setResMemberStoreType(dto.getResMemberStoreType());
-        return vo;
     }
 }

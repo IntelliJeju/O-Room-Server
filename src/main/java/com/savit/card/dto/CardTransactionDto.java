@@ -11,4 +11,5 @@ public class CardTransactionDto {
     private String resMemberStoreType;
     private Long categoryId;
     private Long cardId;
+    private Long userId;
 }
