@@ -1,11 +1,14 @@
 package com.savit.card.domain;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"cardPassword", "encryptedCardNo"})
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Card {
 
@@ -19,6 +22,7 @@ public class Card {
     private String cardPassword;
     private String resCardType;
     private String resSleepYn;
+    private String resImageLink;
     private LocalDateTime registeredAt;
     private Long userId;
 }

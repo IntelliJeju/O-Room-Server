@@ -1,16 +1,14 @@
 package com.savit.card.controller;
 
-import com.savit.card.dto.CardRegisterRequest;
+import com.savit.card.dto.CardDetailResponseDTO;
+import com.savit.card.dto.CardRegisterRequestDTO;
 import com.savit.card.service.CardService;
 import com.savit.security.JwtUtil;
 import com.savit.user.domain.User;
 import com.savit.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/card")
+@RequestMapping("/api/cards")
 @RequiredArgsConstructor
 public class CardController {
 
@@ -29,7 +27,7 @@ public class CardController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerCardAndFetch(
-            @RequestBody @Valid CardRegisterRequest req, HttpServletRequest request) {
+            @RequestBody @Valid CardRegisterRequestDTO req, HttpServletRequest request) {
 
         try {
             Long userId = jwtUtil.getUserIdFromToken(request);
@@ -59,4 +57,22 @@ public class CardController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/{cardId}")
+    public ResponseEntity<?> getCardDetail(
+            @PathVariable Long cardId,
+            HttpServletRequest request
+    ) {
+        try {
+            Long userId = jwtUtil.getUserIdFromToken(request);
+
+            CardDetailResponseDTO response = cardService.getCardDetailWithUsage(cardId, userId);
+
+            return ResponseEntity.ok(Map.of("card", response));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

@@ -2,7 +2,8 @@ package com.savit.card.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.savit.card.domain.Card;
-import com.savit.card.dto.CardRegisterRequest;
+import com.savit.card.dto.CardDetailResponseDTO;
+import com.savit.card.dto.CardRegisterRequestDTO;
 import com.savit.card.mapper.CardMapper;
 import com.savit.card.util.CodefUtil;
 import io.codef.api.EasyCodef;
@@ -26,7 +27,7 @@ public class CardService {
     private final CodefUtil codefUtil;
     private final CardMapper cardMapper;
 
-    public String registerAccount(CardRegisterRequest req) throws Exception {
+    public String registerAccount(CardRegisterRequestDTO req) throws Exception {
 
         String accessToken = codefTokenService.getAccessToken();
 
@@ -77,7 +78,7 @@ public class CardService {
         params.put("connectedId", connectedId);
         params.put("organization", organization);
         params.put("birthDate", birthDate);
-        params.put("inquiryType", "0");
+        params.put("inquiryType", "1");
 
         String resp = client.requestProduct(
                 "/v1/kr/card/p/account/card-list",
@@ -126,9 +127,19 @@ public class CardService {
                         .cardPassword(codefUtil.encryptRSA(cardPassword))
                         .registeredAt(LocalDateTime.now())
                         .userId(userId)
+                        .resImageLink((String) data.get("resImageLink"))
                         .build())
                 .toList();
 
         cardMapper.insertCards(cards);
+    }
+
+    public CardDetailResponseDTO getCardDetailWithUsage(Long cardId, Long userId) {
+        Card card = cardMapper.selectCardByIdAndUserId(cardId, userId);
+        if (card == null) throw new IllegalArgumentException("카드를 찾을 수 없습니다.");
+
+        int usageAmount = cardMapper.selectMonthlyUsageAmount(cardId);
+
+        return new CardDetailResponseDTO(card, usageAmount);
     }
 }

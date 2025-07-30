@@ -1,7 +1,8 @@
 # Sensitive Config
 src/main/resources/application.properties
-src/test/resources/application-test.properties
 src/main/resources/private-key.pem
+src/test/resources/application-test.properties
+src/test/resources/application-test-template.properties
 
 # Gradle
 .gradle/
