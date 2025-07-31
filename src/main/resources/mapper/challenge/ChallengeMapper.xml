@@ -8,7 +8,7 @@
         from challengeparticipation as cp
                  inner join challenge as c on cp.challenge_id = c.id
         where cp.user_id = #{userId}
-          and cp.status = 'success'
+          and cp.status = 'SUCCESS'
           and c.duration_weeks = 1
     </select>
 
@@ -35,6 +35,22 @@
         order by c.start_date asc
 
 
+    </select>
+    <select id="findById" resultType="com.savit.challenge.domain.ChallengeVO">
+
+        select id,
+               title,
+               description,
+               start_date,
+               end_date,
+               entry_fee,
+               target_count,
+               target_amount,
+               type,
+               duration_weeks,
+               category_id
+        from challenge
+        where id = #{id}
     </select>
 
 

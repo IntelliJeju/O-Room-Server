@@ -50,4 +50,30 @@
         )
     </select>
 
+    <!--금액 합계 조회: sum()-->
+    <select id="sumAmountByParams" parameterType="map" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(CAST(res_used_amount AS DECIMAL(12,2))), 0)
+        FROM CardTransaction
+        WHERE card_id IN
+        <foreach collection="cardIds" item="cardId" open="(" separator="," close=")">
+            #{cardId}
+        </foreach>
+        AND category_id = #{categoryId}
+        AND STR_TO_DATE(res_used_date, '%Y%m%d') >= DATE_SUB(NOW(), INTERVAL #{previousWeeks} WEEK)
+        AND (res_cancel_yn IS NULL OR res_cancel_yn != 'Y')
+    </select>
+
+    <!-- 거래 횟수 조회: count(*) -->
+    <select id="countByParams" parameterType="map" resultType="Long">
+        SELECT COUNT(*)
+        FROM CardTransaction
+        WHERE card_id IN
+        <foreach collection="cardIds" item="cardId" open="(" separator="," close=")">
+            #{cardId}
+        </foreach>
+        AND category_id = #{categoryId}
+        AND STR_TO_DATE(res_used_date, '%Y%m%d') >= DATE_SUB(NOW(), INTERVAL #{previousWeeks} WEEK)
+        AND (res_cancel_yn IS NULL OR res_cancel_yn != 'Y')
+    </select>
+
 </mapper>
