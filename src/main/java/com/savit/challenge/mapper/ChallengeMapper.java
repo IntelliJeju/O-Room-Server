@@ -7,5 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface ChallengeMapper {
-    List<ChallengeListDTO> getChallengeList();
+    List<Long> findSuccessfulWeeklyCategories(Long userId);
+    List<ChallengeListDTO> findWeeklyChallenges();
+    List<ChallengeListDTO> findMonthlyChallenges(Long categoryid);
 }

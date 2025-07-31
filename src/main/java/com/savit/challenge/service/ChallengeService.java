@@ -5,5 +5,5 @@ import com.savit.challenge.dto.ChallengeListDTO;
 import java.util.List;
 
 public interface ChallengeService {
-    List<ChallengeListDTO> getChallengeList();
+    List<ChallengeListDTO> getChallengeList(Long userId);
 }

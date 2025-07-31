@@ -18,7 +18,18 @@ public class ChallengeServiceImpl implements ChallengeService{
     private final ChallengeMapper challengeMapper;
 
     @Override
-    public List<ChallengeListDTO> getChallengeList() {
-        return challengeMapper.getChallengeList();
+    public List<ChallengeListDTO> getChallengeList(Long userId) {
+            List<Long> categoryids = challengeMapper.findSuccessfulWeeklyCategories(userId);
+
+            List<ChallengeListDTO> weeklyList = challengeMapper.findWeeklyChallenges();
+
+            if(!categoryids.isEmpty()) {
+                for (Long categoryid : categoryids) {
+                    List<ChallengeListDTO> monthlyList = challengeMapper.findMonthlyChallenges(categoryid);
+                    weeklyList.addAll(monthlyList);
+                }
+            }
+
+            return weeklyList;
     }
 }

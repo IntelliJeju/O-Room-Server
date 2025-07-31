@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class ChallengeListDTO {
+    private Long challengeId;
     private String title;
     private String startDate;
     private String endDate;
