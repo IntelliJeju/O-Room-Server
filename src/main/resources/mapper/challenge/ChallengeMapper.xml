@@ -10,4 +10,35 @@
         where ch.start_date between current_date() AND current_date() + interval (7 - dayofweek(curdate())) day
         order by ch.start_date asc
     </select>
+
+    <!-- 알림용 챌린지 시작일 쿼리 -->
+    <select id="findByStartDate" parameterType="java.time.LocalDate" resultType="com.savit.notification.dto.ChallengeNotificationDTO">
+        SELECT
+            id AS challengeId,
+            title,
+            start_date AS startDate,
+            end_date AS endDate
+        FROM Challenge
+        WHERE start_date = #{startDate}
+    </select>
+
+    <!-- 알림용 챌린지 종료일 쿼리 -->
+    <select id="findByEndDate" parameterType="java.time.LocalDate" resultType="com.savit.notification.dto.ChallengeNotificationDTO">
+        SELECT
+            id AS challengeId,
+            title,
+            start_date AS startDate,
+            end_date AS endDate
+        FROM Challenge
+        WHERE end_date = #{endDate}
+    </select>
+
+    <!-- 챌린지 참여중인 사람 찾기 -->
+    <select id="findUserIdsByChallengeId" resultType="long">
+        SELECT user_id
+        FROM ChallengeParticipation
+        WHERE challenge_id = #{challengeId}
+          AND status = 'PARTICIPATING'
+    </select>
+
 </mapper>
