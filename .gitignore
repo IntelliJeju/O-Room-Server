@@ -18,10 +18,10 @@ build/
 # pem File
 *.pem
 
+# Firebase Service Account Keys
+src/main/resources/firebase/
+*firebase*.json
+*service-account*.json
+
 # macOS
 .DS_Store.gradle/
-
-gradle/wrapper/gradle-wrapper.jar
-gradle/wrapper/gradle-wrapper.properties
-gradlew
-gradlew.bat
