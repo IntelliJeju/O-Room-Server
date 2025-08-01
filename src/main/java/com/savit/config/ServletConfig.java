@@ -10,6 +10,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         "com.savit.user.controller",
         "com.savit.budget.controller",
         "com.savit.card.controller",
-        "com.savit.challenge.controller"
+        "com.savit.challenge.controller",
+        "com.savit.notification.controller",
+        "com.savit.scheduler.controller"
 })public class ServletConfig {
 }
