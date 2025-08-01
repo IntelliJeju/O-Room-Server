@@ -54,4 +54,28 @@
     <select id="findById" resultType="com.savit.user.domain.User">
         SELECT * FROM User WHERE id = #{id}
     </select>
+    
+    <!-- ===== 내부 메서드 호출 방식 - 스케줄러에서 사용 ===== -->
+    
+    <!-- 카드가 등록된 활성 사용자 조회 -->
+    <select id="findUsersWithCards" resultMap="userResultMap">
+        SELECT DISTINCT u.id, u.email, u.nickname, u.profile_image, 
+               u.created_at, u.updated_at, u.kakao_user_id, 
+               c.connected_id, u.refresh_token, u.birth_date
+        FROM User u
+        INNER JOIN Card c ON u.id = c.user_id
+        WHERE c.connected_id IS NOT NULL
+        ORDER BY u.id
+    </select>
+    
+    <!-- FCM 토큰이 등록된 활성 사용자 조회 -->
+    <select id="findUsersWithFcmTokens" resultMap="userResultMap">
+        SELECT DISTINCT u.id, u.email, u.nickname, u.profile_image, 
+               u.created_at, u.updated_at, u.kakao_user_id, 
+               u.connected_id, u.refresh_token, u.birth_date
+        FROM User u
+        INNER JOIN UserFcmTokens t ON u.id = t.user_id
+        WHERE t.is_active = TRUE
+        ORDER BY u.id
+    </select>
 </mapper>

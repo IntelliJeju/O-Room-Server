@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.savit.card.domain.CardApproval;
 import com.savit.card.dto.ApprovalApiDataDTO;
 import com.savit.card.dto.CardTransactionDto;
+import com.savit.card.dto.BudgetMonitoringDTO;
 import com.savit.card.dto.DashboardDTO;
 import com.savit.card.mapper.CardApprovalMapper;
 import com.savit.budget.service.BudgetService;
@@ -222,7 +223,7 @@ public class CardApprovalService {
         return cardApprovalMapper.findApprovalsByCardId(userId, cardId);
     }
 
-    // 메인 대시보드 데이터 조회 (Budget 연계)
+    // 메인 대시보드 데이터 조회 (Budget 연계) - 컨트롤러용
     public DashboardDTO getDashboardData(Long userId) {
         LocalDate now = LocalDate.now();
         String currentMonth =
@@ -233,7 +234,7 @@ public class CardApprovalService {
         // 1. Budget에서 사용자 예산 정보 조회
         BudgetVO budget = budgetService.getBudget(userId);
 
-        // 2. 이번달/저번달 사용금액 계산
+        // 2. 이번달/저번달 사용금액 ��산
         BigDecimal thisMonthUsage = calculateMonthlyUsage(userId,
                 currentMonth);
         BigDecimal lastMonthUsage = calculateMonthlyUsage(userId, lastMonth);
@@ -311,5 +312,87 @@ public class CardApprovalService {
         return totalUsage
                 .divide(BigDecimal.TEN, 0, RoundingMode.DOWN)
                 .multiply(BigDecimal.TEN);
+    }
+    
+    // ===== 내부 메서드 호출 방식 - 스케줄러에서 사용 =====
+    
+    /**
+     * 내부 메서드 호출 방식 - 예산 모니터링용 데이터 조회
+     * 스케줄러에서 예산 초과 여부 판단을 위해 사용
+     */
+    public BudgetMonitoringDTO getBudgetMonitoringData(Long userId) {
+        LocalDate now = LocalDate.now();
+        String currentMonth = now.format(DateTimeFormatter.ofPattern("yyyyMM"));
+        
+        // 1. 예산 정보 조회
+        BudgetVO budget = budgetService.getBudget(userId);
+        
+        // 2. 이번 달 사용금액 계산
+        BigDecimal thisMonthUsage = calculateMonthlyUsage(userId, currentMonth);
+        
+        // 3. 예산 계산
+        BigDecimal totalBudget = BigDecimal.ZERO;
+        BigDecimal usageRate = BigDecimal.ZERO;
+        boolean hasBudget = false;
+        boolean isOverBudget = false;
+        boolean isWarningLevel = false; // 80% 초과 여부
+        
+        if (budget != null && budget.getTotalBudget() != null) {
+            hasBudget = true;
+            totalBudget = budget.getTotalBudget()
+                    .divide(BigDecimal.TEN, 0, RoundingMode.DOWN)
+                    .multiply(BigDecimal.TEN);
+            
+            if (totalBudget.compareTo(BigDecimal.ZERO) > 0) {
+                usageRate = thisMonthUsage.divide(totalBudget, 4, RoundingMode.HALF_UP);
+                isOverBudget = usageRate.compareTo(BigDecimal.ONE) > 0; // 100% 초과
+                isWarningLevel = usageRate.compareTo(BigDecimal.valueOf(0.8)) >= 0; // 80% 이상
+            }
+        }
+        
+        return BudgetMonitoringDTO.builder()
+                .userId(userId)
+                .currentMonth(currentMonth)
+                .totalBudget(totalBudget)
+                .thisMonthUsage(thisMonthUsage)
+                .usageRate(usageRate)
+                .hasBudget(hasBudget)
+                .isOverBudget(isOverBudget)
+                .isWarningLevel(isWarningLevel)
+                .build();
+    }
+    
+    /**
+     * 내부 메서드 호출 방식 - 새 거래내역 추가 후 예산 체크 트리거
+     * 스케줄러에서 fetchAndSaveApprovals 호출 후 사용
+     */
+    @Transactional
+    public boolean fetchAndSaveApprovalsWithBudgetCheck(Long userId, Long cardId) throws Exception {
+        List<CardApproval> newApprovals = fetchAndSaveApprovals(userId, cardId);
+        return !newApprovals.isEmpty(); // 새로운 거래내역이 있으면 true 반환
+    }
+    
+    /**
+     * 내부 메서드 호출 방식 - 사용자의 모든 카드 처리 후 예산 체크 트리거  
+     * 스케줄러에서 사용
+     */
+    @Transactional
+    public boolean fetchAndSaveAllCardsWithBudgetCheck(Long userId) {
+        List<Long> cardIds = cardApprovalMapper.findCardIdsByUser(userId);
+        boolean hasNewTransactions = false;
+        
+        for (Long cardId : cardIds) {
+            try {
+                List<CardApproval> newApprovals = fetchAndSaveApprovals(userId, cardId);
+                if (!newApprovals.isEmpty()) {
+                    hasNewTransactions = true;
+                }
+            } catch (Exception e) {
+                log.error("카드 {} 처리 중 오류", cardId, e);
+            }
+        }
+        
+        log.info("사용자 {} 카드 승인내역 동기화 완료 - 새 거래내역 여부: {}", userId, hasNewTransactions);
+        return hasNewTransactions;
     }
 }

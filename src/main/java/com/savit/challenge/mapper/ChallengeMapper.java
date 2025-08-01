@@ -1,5 +1,6 @@
 package com.savit.challenge.mapper;
 
+import com.savit.challenge.domain.ChallengeVO;
 import com.savit.challenge.dto.ChallengeListDTO;
 import com.savit.notification.dto.ChallengeNotificationDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -20,4 +21,15 @@ public interface ChallengeMapper {
 
     // 챌린지 ID로 참여 중인 유저 ID 리스트 조회
     List<Long> findUserIdsByChallengeId(@Param("challengeId") Long challengeId);
+    
+  // 리스트 조회
+    List<Long> findSuccessfulWeeklyCategories(Long userId);
+    List<ChallengeListDTO> findWeeklyChallenges();
+    List<ChallengeListDTO> findMonthlyChallenges(Long categoryid);
+
+    // 상세조회
+    ChallengeVO findById(Long id);
+
+    // 참여중인 챌린지 조회
+    List<ChallengeListDTO> findParticipatingChallenges(Long userId);
 }

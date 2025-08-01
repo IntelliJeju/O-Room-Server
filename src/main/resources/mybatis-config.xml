@@ -10,5 +10,6 @@
     <mappers>
         <package name = "com.savit.user.mapper"/>
         <package name = "com.savit.card.mapper"/>
+        <package name = "com.savit.challenge.mapper"/>
     </mappers>
 </configuration>
