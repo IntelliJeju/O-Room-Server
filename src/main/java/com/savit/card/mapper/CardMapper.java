@@ -11,4 +11,5 @@ public interface CardMapper {
     void insertCards(@Param("cards") List<Card> cards);
     Card selectCardByIdAndUserId(@Param("cardId") Long cardId, @Param("userId") Long userId);
     int selectMonthlyUsageAmount(@Param("cardId") Long cardId);
+    List<Card> selectCardsByUserId(Long userId);
 }
