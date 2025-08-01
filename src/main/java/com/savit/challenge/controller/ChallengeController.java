@@ -33,6 +33,14 @@ public class ChallengeController {
     public ResponseEntity<ChallengeDetailDTO> getChallengeDetail(@PathVariable Long challenge_id, HttpServletRequest request) {
         Long userId = jwtUtil.getUserIdFromToken(request);
         ChallengeDetailDTO result = challengeService.getChallengeDetail(challenge_id, userId);
-                return ResponseEntity.ok(result);
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/participating")
+    public ResponseEntity<List<ChallengeListDTO>> getParticipatingChallenges (HttpServletRequest request) {
+        Long userId = jwtUtil.getUserIdFromToken(request);
+        List<ChallengeListDTO> result = challengeService.getParticipatingChallenges(userId);
+        return ResponseEntity.ok(result);
+
     }
 }

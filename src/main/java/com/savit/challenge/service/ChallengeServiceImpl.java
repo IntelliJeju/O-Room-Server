@@ -24,7 +24,6 @@ import java.util.Map;
 @Transactional
 public class ChallengeServiceImpl implements ChallengeService {
 
-
     private final ChallengeMapper challengeMapper;
     private final CategoryMapper categoryMapper;
     private final CardApprovalMapper cardMapper;
@@ -113,5 +112,9 @@ public class ChallengeServiceImpl implements ChallengeService {
 
         }
         return 0;
+    }
+    @Override
+    public List<ChallengeListDTO> getParticipatingChallenges(Long userId) {
+        return challengeMapper.findParticipatingChallenges(userId);
     }
 }

@@ -54,4 +54,13 @@
     </select>
 
 
+    <select id="findParticipatingChallenges" resultType="com.savit.challenge.dto.ChallengeListDTO">
+        select cp.challenge_id, c.title, c.start_date, c.end_date
+        from challengeParticipation as cp
+                 inner join challenge as c on cp.challenge_id = c.id
+        where cp.user_id = #{userId}
+          and cp.status = 'PARTICIPATING'
+        ORDER BY c.start_date asc;
+    </select>
+
 </mapper>

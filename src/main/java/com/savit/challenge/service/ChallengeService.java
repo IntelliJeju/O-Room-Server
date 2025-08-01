@@ -11,4 +11,6 @@ public interface ChallengeService {
     ChallengeDetailDTO getChallengeDetail(Long challengeId, Long userId);
     int checkEligibility(ChallengeVO vo, Long userId);
 
+    List<ChallengeListDTO> getParticipatingChallenges (Long userId);
+
 }

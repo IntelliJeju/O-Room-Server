@@ -15,4 +15,7 @@ public interface ChallengeMapper {
 
     // 상세조회
     ChallengeVO findById(Long id);
+
+    // 참여중인 챌린지 조회
+    List<ChallengeListDTO> findParticipatingChallenges(Long userId);
 }
