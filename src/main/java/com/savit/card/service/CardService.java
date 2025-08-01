@@ -142,4 +142,14 @@ public class CardService {
 
         return new CardDetailResponseDTO(card, usageAmount);
     }
+
+    public List<CardDetailResponseDTO> getCardListByUser(Long userId) {
+        List<Card> cards = cardMapper.selectCardsByUserId(userId);
+
+        return cards.stream().map(card -> {
+            int usageAmount = cardMapper.selectMonthlyUsageAmount(card.getId());
+            return new CardDetailResponseDTO(card, usageAmount);
+        }).toList();
+    }
+
 }

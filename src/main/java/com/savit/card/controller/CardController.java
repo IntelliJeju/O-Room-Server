@@ -75,4 +75,16 @@ public class CardController {
         }
     }
 
+    @GetMapping
+    public ResponseEntity<?> getUserCardList(HttpServletRequest request) {
+        try {
+            Long userId = jwtUtil.getUserIdFromToken(request);
+            List<CardDetailResponseDTO> cardList = cardService.getCardListByUser(userId);
+            return ResponseEntity.ok(Map.of("cards", cardList));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

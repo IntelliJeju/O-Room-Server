@@ -44,6 +44,11 @@
           AND user_id = #{userId}
     </select>
 
+    <select id="selectCardsByUserId" resultType="com.savit.card.domain.Card">
+        SELECT * FROM card
+        WHERE user_id = #{userId}
+    </select>
+
     <select id="selectMonthlyUsageAmount" resultType="int">
         SELECT COALESCE(SUM(CAST(res_used_amount AS UNSIGNED)), 0)
         FROM CardTransaction
