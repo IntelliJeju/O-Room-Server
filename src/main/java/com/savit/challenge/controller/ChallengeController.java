@@ -22,14 +22,14 @@ public class ChallengeController {
     private  final ChallengeService challengeService;
     private final JwtUtil jwtUtil;
 
-    @GetMapping
+    @GetMapping("/available")
     public ResponseEntity<List<ChallengeListDTO>> getChallengeList (HttpServletRequest request) {
         Long userId = jwtUtil.getUserIdFromToken(request);
         List<ChallengeListDTO> result = challengeService.getChallengeList(userId);
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/{challenge_id}")
+    @GetMapping("/available/{challenge_id}")
     public ResponseEntity<ChallengeDetailDTO> getChallengeDetail(@PathVariable Long challenge_id, HttpServletRequest request) {
         Long userId = jwtUtil.getUserIdFromToken(request);
         ChallengeDetailDTO result = challengeService.getChallengeDetail(challenge_id, userId);
