@@ -3,6 +3,7 @@ package com.savit.card.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.savit.card.domain.CardApproval;
 import com.savit.card.dto.ApprovalApiDataDTO;
+import com.savit.card.dto.CardTransactionDto;
 import com.savit.card.dto.BudgetMonitoringDTO;
 import com.savit.card.dto.DashboardDTO;
 import com.savit.card.mapper.CardApprovalMapper;
@@ -38,11 +39,12 @@ public class CardApprovalService {
     private final CodefUtil codefUtil;
     private final BudgetService budgetService;
 //    private final ObjectMapper objectMapper;
+    private final CardTransactionService cardTransactionService;
 
     @Transactional
     public List<CardApproval> fetchAndSaveApprovals(Long userId, Long cardId) throws Exception {
         log.info("=== 승인내역 조회 시작 - userId: {}, cardId: {} ===", userId, cardId);
-        
+
         // 1. DB에서 API 호출에 필요한 데이터 조회
         log.info("1. DB 데이터 조회 시작");
         ApprovalApiDataDTO apiData = cardApprovalMapper.findDataForApprovalApi(userId, cardId);
@@ -114,6 +116,19 @@ public class CardApprovalService {
         if (!newApprovals.isEmpty()) {
             cardApprovalMapper.insertApprovals(newApprovals);
             log.info("새 승인내역 저장 완료: {}건", newApprovals.size());
+
+            for (CardApproval approval : newApprovals) {
+                CardTransactionDto dto = CardTransactionDto.builder()
+                        .cardId(approval.getCardId())
+                        .userId(userId)
+                        .resUsedDate(approval.getResUsedDate())
+                        .resUsedTime(approval.getResUsedTime())
+                        .resMemberStoreName(approval.getResMemberStoreName())
+                        .resMemberStoreType(approval.getResMemberStoreType())
+                        .build();
+
+                cardTransactionService.autoClassifyTransaction(dto);
+            }
         } else {
             log.info("저장할 새 승인내역이 없습니다.");
         }
@@ -174,7 +189,7 @@ public class CardApprovalService {
         params.put("cardNo", apiData.getResCardNo()); // 마스킹된 번호 사용
         params.put("cardPassword", apiData.getCardPassword()); // 암호화된 값 그대로 사용
         params.put("memberStoreInfoType", "1"); // 가맹점 정보 포함 "1"
-        
+
         log.info("API 파라미터 - cardNo: {}, cardName: {}", apiData.getResCardNo(), apiData.getCardName());
 
         String resp = client.requestProduct(

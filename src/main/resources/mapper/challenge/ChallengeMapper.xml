@@ -12,6 +12,36 @@
           and c.duration_weeks = 1
     </select>
 
+
+    <!-- 알림용 챌린지 시작일 쿼리 -->
+    <select id="findByStartDate" parameterType="java.time.LocalDate" resultType="com.savit.notification.dto.ChallengeNotificationDTO">
+        SELECT
+            id AS challengeId,
+            title,
+            start_date AS startDate,
+            end_date AS endDate
+        FROM Challenge
+        WHERE start_date = #{startDate}
+    </select>
+
+    <!-- 알림용 챌린지 종료일 쿼리 -->
+    <select id="findByEndDate" parameterType="java.time.LocalDate" resultType="com.savit.notification.dto.ChallengeNotificationDTO">
+        SELECT
+            id AS challengeId,
+            title,
+            start_date AS startDate,
+            end_date AS endDate
+        FROM Challenge
+        WHERE end_date = #{endDate}
+    </select>
+
+    <!-- 챌린지 참여중인 사람 찾기 -->
+    <select id="findUserIdsByChallengeId" resultType="long">
+        SELECT user_id
+        FROM ChallengeParticipation
+        WHERE challenge_id = #{challengeId}
+          AND status = 'PARTICIPATING'
+
     <!--참여 가능한 1주 챌린지 목록 조회(1번 여부 상관 없이 조회됨)-->
     <select id="findWeeklyChallenges" resultType="com.savit.challenge.dto.ChallengeListDTO">
         select c.id as challenge_id, c.title, c.start_date, c.end_date, cat.name as categoryName

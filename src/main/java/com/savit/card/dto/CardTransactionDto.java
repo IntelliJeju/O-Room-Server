@@ -1,7 +1,9 @@
 package com.savit.card.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
+@Builder
 @Data
 public class CardTransactionDto {
     private String resMemberStoreName;
