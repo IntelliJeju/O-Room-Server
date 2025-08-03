@@ -1,0 +1,22 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.challenge.mapper.ChallengeParticipationMapper">
+
+    <!-- 참여 여부 확인 -->
+    <select id="existsParticipation" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1 FROM ChallengeParticipation
+            WHERE challenge_id = #{challengeId} AND user_id = #{userId}
+        )
+    </select>
+
+    <!-- 챌린지 참여 삽입 -->
+    <insert id="insertParticipation">
+        INSERT INTO ChallengeParticipation (
+            challenge_id, user_id, status, my_fee, created_at
+        ) VALUES (
+                     #{challengeId}, #{userId}, 'PARTICIPATING', #{myFee}, NOW()
+                 )
+    </insert>
+
+</mapper>
