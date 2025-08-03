@@ -111,7 +111,12 @@ public class CardService {
                           String encryptedCardNo,
                           String cardPassword) {
 
-        List<Card> cards = cardDataList.stream().map(data -> Card.builder()
+        List<Card> cards = cardDataList.stream()
+                .filter(data -> {
+                    String resCardNo = (String) data.get("resCardNo");
+                    return !cardMapper.existsCardByResCardNoAndUserId(resCardNo, userId);
+                })
+                .map(data -> Card.builder()
                         .connectedId(connectedId)
                         .organization(organization)
                         .cardName((String) data.get("resCardName"))
@@ -131,7 +136,9 @@ public class CardService {
                         .build())
                 .toList();
 
-        cardMapper.insertCards(cards);
+        if (!cards.isEmpty()) {
+            cardMapper.insertCards(cards);
+        }
     }
 
     public CardDetailResponseDTO getCardDetailWithUsage(Long cardId, Long userId) {
