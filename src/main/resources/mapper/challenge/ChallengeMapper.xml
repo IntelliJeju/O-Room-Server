@@ -41,6 +41,7 @@
         FROM ChallengeParticipation
         WHERE challenge_id = #{challengeId}
           AND status = 'PARTICIPATING'
+    </select>
 
     <!--참여 가능한 1주 챌린지 목록 조회(1번 여부 상관 없이 조회됨)-->
     <select id="findWeeklyChallenges" resultType="com.savit.challenge.dto.ChallengeListDTO">
