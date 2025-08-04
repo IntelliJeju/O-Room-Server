@@ -16,6 +16,10 @@ public class CodefTokenRepository {
         return Optional.ofNullable(mapper.findValidToken());
     }
     public void save(CodefToken token) {
-        mapper.insertToken(token);
+        if (mapper.exists()) {
+            mapper.updateToken(token);
+        } else {
+            mapper.insertToken(token);
+        }
     }
 }
