@@ -2,6 +2,7 @@ package com.savit.challenge.mapper;
 
 import com.savit.challenge.domain.ChallengeVO;
 import com.savit.challenge.dto.ChallengeListDTO;
+import com.savit.challenge.dto.ChallengeDropoutSummaryDTO;
 import com.savit.notification.dto.ChallengeNotificationDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -32,4 +33,10 @@ public interface ChallengeMapper {
 
     // 참여중인 챌린지 조회
     List<ChallengeListDTO> findParticipatingChallenges(Long userId);
+
+    // 진행 중인 챌린지별 낙오 요약 통계 조회
+    List<ChallengeDropoutSummaryDTO> getChallengeDropoutSummaries();
+
+    // 특정 챌린지의 FCM 토큰 등록된 참여자 조회
+    List<Long> findParticipantUserIdsByChallengeId(@Param("challengeId") Long challengeId);
 }
