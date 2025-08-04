@@ -7,6 +7,10 @@ src/test/resources/application-test-template.properties
 # Gradle
 .gradle/
 build/
+build.gradle
+gradlew
+gradlew.bat
+gradle/
 
 # IntelliJ
 .idea/
