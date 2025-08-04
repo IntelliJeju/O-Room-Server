@@ -25,10 +25,10 @@ public class RandomNaggingScheduler {
 
 
     /**
-     * 테스트용 - 랜덤 잔소리 알림 (1분 후 딱 한번만 실행)
+     * 테스트용 - 랜덤 잔소리 알림 (테스트 완료로 비활성화)
      * 서버 시작 1분 후에 딱 한번만 실행되는 테스트용 스케줄러
      */
-    @Scheduled(initialDelay = 60000,  fixedDelay = Long.MAX_VALUE) // 1분 후 실행, 한번만 (29만년후 다시실행)
+    // @Scheduled(initialDelay = 60000,  fixedDelay = Long.MAX_VALUE) // 테스트 완료로 비활성화
     public void sendRandomNaggingNotificationsForTest() {
         log.info("===== 테스트용 랜덤 잔소리 알림 스케줄러 시작 (딱 한번만 실행) =====");
 
