@@ -1,9 +1,7 @@
 package com.savit.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.savit.common.exception.JwtTokenException;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -70,11 +68,17 @@ public class JwtTokenProvider {
 
    // 토큰에서 userid 추출
     public String getUserId(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+        try {
+           return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject();
+        }  catch (ExpiredJwtException e) {
+            throw new JwtTokenException("토큰이 만료되었습니다");
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new JwtTokenException("유효하지 않은 토큰입니다");
+        }
     }
 
     // 토큰 유효성 검증
@@ -82,8 +86,10 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
+        } catch  (ExpiredJwtException e) {
+            throw new JwtTokenException("토큰이 만료되었습니다");
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            throw new JwtTokenException("유효하지 않은 토큰입니다");
         }
     }
 
@@ -95,8 +101,10 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
             return "access".equals(claims.get("type"));
+        } catch (ExpiredJwtException e) {
+            throw new JwtTokenException("토큰이 만료되었습니다");
         } catch (Exception e) {
-            return false;
+            throw new JwtTokenException("토큰 타입을 확인할 수 없습니다");
         }
     }
 
@@ -108,8 +116,10 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token)
                     .getBody();
             return "refresh".equals(claims.get("type"));
+        } catch (ExpiredJwtException e) {
+            throw new JwtTokenException("토큰이 만료되었습니다");
         } catch (Exception e) {
-            return false;
+            throw new JwtTokenException("토큰 타입을 확인할 수 없습니다");
         }
     }
 

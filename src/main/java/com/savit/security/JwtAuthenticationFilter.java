@@ -1,5 +1,6 @@
 package com.savit.security;
 
+import com.savit.common.exception.JwtTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +13,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements Filter {
 
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -26,22 +27,22 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
 
-        String token = extractToken(httpRequest);
 
-        if (token != null && jwtTokenProvider.validateToken(token) && jwtTokenProvider.isAccessToken(token)) {
-            // 토큰이 유효한 경우 - 요청에 userId 정보 추가
-            String userId = jwtTokenProvider.getUserId(token);
-            httpRequest.setAttribute("userId", userId);
+        try {
+            Long userId = jwtUtil.getUserIdFromToken(httpRequest);
+            httpRequest.setAttribute("userId", userId.toString());
+        } catch (JwtTokenException e) {
+            httpResponse.setStatus(401);
+            httpResponse.setCharacterEncoding("UTF-8");
+            httpResponse.setContentType("application/json;charset=UTF-8");
+
+            httpResponse.setHeader("Access-Control-Allow-Origin", "*");
+            httpResponse.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            httpResponse.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+
+            httpResponse.getWriter().write("\"" + e.getMessage() + "\"");
+            return;
         }
-
-        chain.doFilter(request, response);
-    }
-
-    private String extractToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-        return null;
+        chain.doFilter(request,response);
     }
 }

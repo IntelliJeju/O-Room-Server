@@ -12,6 +12,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         "com.savit.card.controller",
         "com.savit.challenge.controller",
         "com.savit.notification.controller",
-        "com.savit.scheduler.controller"
+        "com.savit.scheduler.controller",
+        "com.savit.common.exception"
 })public class ServletConfig {
 }
