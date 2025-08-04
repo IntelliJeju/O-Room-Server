@@ -20,6 +20,10 @@
             LIMIT  1
     </select>
 
+    <select id="exists" resultType="boolean">
+        SELECT EXISTS (SELECT 1 FROM CodefAccessToken)
+    </select>
+
     <insert id="insertToken"
             parameterType="com.savit.card.domain.CodefToken"
             useGeneratedKeys="true"
@@ -29,5 +33,13 @@
         VALUES
             (#{accessToken}, #{expiresAt}, #{createdAt}, #{updatedAt})
     </insert>
+
+    <update id="updateToken"
+            parameterType="com.savit.card.domain.CodefToken">
+        UPDATE CodefAccessToken
+        SET access_token = #{accessToken},
+            expires_at   = #{expiresAt},
+            updated_at   = #{updatedAt}
+    </update>
 
 </mapper>
