@@ -21,6 +21,10 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
 
     public String sendNotification(PushNotificationRequest request) {
+        return sendNotification(request, null);
+    }
+
+    public String sendNotification(PushNotificationRequest request, Long userId) {
         if (firebaseMessaging == null) {
             log.error("FirebaseMessaging is not initialized");
             throw new RuntimeException("Firebase messaging service is not available");
@@ -49,26 +53,30 @@ public class NotificationService {
             String response = firebaseMessaging.send(message);
             log.info("Successfully sent message: {}", response);
 
-            PushNotification pushNotification = new PushNotification();
-            pushNotification.setFcmToken(request.getToken());
-            pushNotification.setTitle(request.getTitle());
-            pushNotification.setBody(request.getBody());
-            pushNotification.setStatus("SENT");
-            pushNotification.setSentAt(LocalDateTime.now());
-            pushNotification.setCreatedAt(LocalDateTime.now());
+            PushNotification pushNotification = PushNotification.builder()
+                    .userId(userId)
+                    .fcmToken(request.getToken())
+                    .title(request.getTitle())
+                    .body(request.getBody())
+                    .status("SENT")
+                    .sentAt(LocalDateTime.now())
+                    .createdAt(LocalDateTime.now())
+                    .build();
             notificationMapper.insertNotification(pushNotification);
 
             return response;
         } catch (FirebaseMessagingException e) { // 에러 확인용으로 DB에 일단 저장
             log.error("Failed to send message: {}", e.getMessage());
 
-            PushNotification pushNotification = new PushNotification();
-            pushNotification.setFcmToken(request.getToken());
-            pushNotification.setTitle(request.getTitle());
-            pushNotification.setBody(request.getBody());
-            pushNotification.setStatus("FAILED");
-            pushNotification.setErrorMessage(e.getMessage());
-            pushNotification.setCreatedAt(LocalDateTime.now());
+            PushNotification pushNotification = PushNotification.builder()
+                    .userId(userId)
+                    .fcmToken(request.getToken())
+                    .title(request.getTitle())
+                    .body(request.getBody())
+                    .status("FAILED")
+                    .errorMessage(e.getMessage())
+                    .createdAt(LocalDateTime.now())
+                    .build();
             notificationMapper.insertNotification(pushNotification);
 
             throw new RuntimeException("Failed to send notification", e);
@@ -93,7 +101,7 @@ public class NotificationService {
                     token.getFcmToken(), title, body
             );
             try {
-                sendNotification(request);
+                sendNotification(request, userId);
             } catch (Exception e) {
                 log.error("Failed to send notification to token: {}", token.getFcmToken(), e);
             }

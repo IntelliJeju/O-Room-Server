@@ -91,7 +91,36 @@
                  inner join challenge as c on cp.challenge_id = c.id
         where cp.user_id = #{userId}
           and cp.status = 'PARTICIPATING'
-        ORDER BY c.start_date asc;
+        ORDER BY c.start_date ASC;
+    </select>
+
+    <!-- 진행 중인 챌린지별 낙오 요약 통계 조회 -->
+    <select id="getChallengeDropoutSummaries" resultType="com.savit.challenge.dto.ChallengeDropoutSummaryDTO">
+        <![CDATA[
+            SELECT
+                c.id as challengeId,
+                c.title as challengeTitle,
+                COUNT(cp.id) as totalParticipants,
+                SUM(CASE WHEN cp.status = 'FAIL' THEN 1 ELSE 0 END) as dropoutCount,
+                (COUNT(cp.id) - SUM(CASE WHEN cp.status = 'FAIL' THEN 1 ELSE 0 END)) as activeCount
+            FROM Challenge c
+            JOIN ChallengeParticipation cp ON c.id = cp.challenge_id
+            WHERE c.start_date <= CURDATE()
+              AND c.end_date >= CURDATE()
+            GROUP BY c.id, c.title
+        ]]>
+    </select>
+
+    <!-- 특정 챌린지의 FCM 토큰 등록된 참여자 조회 -->
+    <select id="findParticipantUserIdsByChallengeId" resultType="Long">
+        <![CDATA[
+            SELECT DISTINCT cp.user_id
+            FROM ChallengeParticipation cp
+            JOIN UserFcmTokens uft ON cp.user_id = uft.user_id
+            WHERE cp.challenge_id = #{challengeId}
+              AND uft.is_active = true
+              AND uft.fcm_token != ''
+        ]]>
     </select>
 
     <select id="selectChallengeType" resultType="java.lang.String">
