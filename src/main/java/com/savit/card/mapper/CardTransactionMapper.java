@@ -12,8 +12,7 @@ import java.util.Map;
 public interface CardTransactionMapper {
 
     void updateCategory(@Param("transactionId") Long transactionId,
-                        @Param("categoryId") Long categoryId,
-                        @Param("resMemberStoreType") String resMemberStoreType);
+                        @Param("categoryId") Long categoryId);
 
     List<CardTransactionVO> findUnclassifiedTransactionsByUser(@Param("userId") Long userId);
 
