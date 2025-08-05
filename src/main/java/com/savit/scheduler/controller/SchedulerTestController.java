@@ -7,6 +7,8 @@ import com.savit.card.service.CardApprovalService;
 import com.savit.notification.service.NotificationService;
 import com.savit.scheduler.job.CardApprovalScheduler;
 import com.savit.scheduler.job.RandomNaggingScheduler;
+import com.savit.scheduler.job.ChallengeDropoutScheduler;
+import com.savit.scheduler.job.DailyTopSpendingScheduler;
 import com.savit.user.mapper.UserMapper;
 import com.savit.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,10 @@ public class SchedulerTestController {
     private final CardApprovalService cardApprovalService;
     private final NotificationService notificationService;
     private final UserMapper userMapper;
-    private final com.savit.scheduler.job.DailyTopSpendingScheduler dailyTopSpendingScheduler;
+
+    private final ChallengeDropoutScheduler challengeDropoutScheduler;
+    private final DailyTopSpendingScheduler dailyTopSpendingScheduler;
+
 
     /**
      * 모든 사용자 카드 승인내역 동기화 스케줄러 수동 실행
@@ -221,6 +226,32 @@ public class SchedulerTestController {
     }
 
     /**
+     * 챌린지 일일 낙오 요약 알림 테스트
+     */
+    @PostMapping("/challenge-dropout-summary")
+    public ResponseEntity<Map<String, Object>> testChallengeDropoutSummary() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            log.info("=== 챌린지 일일 낙오 요약 알림 수동 테스트 시작 ===");
+
+            challengeDropoutScheduler.sendDailyDropoutSummary();
+
+            response.put("status", "success");
+            response.put("message", "챌린지 일일 낙오 요약 알림 발송 완료");
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("챌린지 일일 낙오 요약 알림 테스트 실패", e);
+            response.put("status", "error");
+            response.put("message", "실행 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+     /**
      * 일일 최고 지출 데이터 수집 테스트
      */
     @PostMapping("/daily-top-spending/collect")
