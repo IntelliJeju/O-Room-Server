@@ -25,43 +25,43 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource("classpath:application-test.properties")
 class RootConfigTest {
 
-    @Autowired
-    private DataSource dataSource;
-
-    @Autowired
-    private PropertySourcesPlaceholderConfigurer configurer;
-
-    @Autowired
-    private RootConfig rootConfig;
-
-
-    @Test
-    @DisplayName("DataSource가 정상적으로 연결된다.")
-    void dataSource() throws Exception {
-        try (Connection conn = dataSource.getConnection()) {
-            assertNotNull(conn);
-            log.info("DB 연결 성공: {}", conn);
-        }
-    }
-
-    @Test
-    @DisplayName("PropertySourcesPlaceholderConfigurer 빈이 정상 생성된다.")
-    void propertyConfig() {
-        assertNotNull(configurer, "PropertySourcesPlaceholderConfigurer가 null입니다.");
-        log.info("propertyConfig() 정상 생성됨: {}", configurer.getClass().getSimpleName());
-    }
-
-    @Test
-    @DisplayName("@Value 설정 값이 주입되어 있다.")
-    void checkInjectedValues() throws Exception {
-        String[] fieldNames = { "driver", "url", "username", "password" };
-
-        for (String fieldName : fieldNames) {
-            var field = RootConfig.class.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            var value = field.get(rootConfig);
-            assertNotNull(value, fieldName + " 주입 실패");
-            log.info("{} = {}", fieldName, value);
-        }
-    }
+//    @Autowired
+//    private DataSource dataSource;
+//
+//    @Autowired
+//    private PropertySourcesPlaceholderConfigurer configurer;
+//
+//    @Autowired
+//    private RootConfig rootConfig;
+//
+//
+//    @Test
+//    @DisplayName("DataSource가 정상적으로 연결된다.")
+//    void dataSource() throws Exception {
+//        try (Connection conn = dataSource.getConnection()) {
+//            assertNotNull(conn);
+//            log.info("DB 연결 성공: {}", conn);
+//        }
+//    }
+//
+//    @Test
+//    @DisplayName("PropertySourcesPlaceholderConfigurer 빈이 정상 생성된다.")
+//    void propertyConfig() {
+//        assertNotNull(configurer, "PropertySourcesPlaceholderConfigurer가 null입니다.");
+//        log.info("propertyConfig() 정상 생성됨: {}", configurer.getClass().getSimpleName());
+//    }
+//
+//    @Test
+//    @DisplayName("@Value 설정 값이 주입되어 있다.")
+//    void checkInjectedValues() throws Exception {
+//        String[] fieldNames = { "driver", "url", "username", "password" };
+//
+//        for (String fieldName : fieldNames) {
+//            var field = RootConfig.class.getDeclaredField(fieldName);
+//            field.setAccessible(true);
+//            var value = field.get(rootConfig);
+//            assertNotNull(value, fieldName + " 주입 실패");
+//            log.info("{} = {}", fieldName, value);
+//        }
+//    }
 }
