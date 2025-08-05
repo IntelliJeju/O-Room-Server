@@ -1,6 +1,7 @@
 package com.savit.card.mapper;
 
 import com.savit.card.domain.CardTransactionVO;
+import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -31,4 +32,9 @@ public interface CardTransactionMapper {
     BigDecimal sumAmountByParams (Map<String, Object> params);
     // 2) 횟수 기준: type = COUNT
     Long countByParams(Map<String, Object> params);
+
+    // 전날 최고 지출 항목 조회 (사용자별, 카테고리명 포함)
+    @MapKey("id") // 단일 결과여서 없어도 되는데 빨간 오류줄 없애려고 추가
+    Map<String, Object> findTopSpendingByUserAndDate(@Param("userId") Long userId,
+                                                     @Param("targetDate") String targetDate);
 }

@@ -22,9 +22,9 @@ public class CardTransactionService {
     private final CategoryMapper categoryMapper;
 
     private static final Map<String, List<String>> NAME_KEYWORDS = Map.ofEntries(
-            Map.entry("식당", List.of("김밥", "한솥", "맘스터치", "본죽", "삼겹살", "국밥", "쌀국수", "고기", "마라탕", "우동", "돈까스", "비빔밥", "분식")),
-            Map.entry("카페", List.of("스타벅스", "이디야", "컴포즈", "투썸", "커피", "베스킨", "메가커피", "폴바셋", "할리스", "블루보틀")),
-            Map.entry("배달", List.of("배달의민족", "요기요", "쿠팡이츠", "땡겨요", "배달앱", "배달전문", "배민")),
+            Map.entry("식당", List.of("일반음식점", "패스트푸드", "맥도날드", "일반", "김밥", "한솥", "맘스터치", "본죽", "삼겹살", "국밥", "쌀국수", "고기", "마라탕", "우동", "돈까스", "비빔밥", "분식")),
+            Map.entry("카페", List.of("스타벅스", "이디야", "컴포즈", "투썸", "커피", "베스킨", "메가", "폴바셋", "할리스", "블루보틀")),
+            Map.entry("배달", List.of("배달의민족", "요기요", "쿠팡이츠", "땡겨요", "배달앱", "배달전문", "배민", "우아한형제")),
             Map.entry("대중교통", List.of("버스", "지하철", "티머니", "교통카드", "환승", "대중교통")),
             Map.entry("택시", List.of("카카오택시", "타다", "마카롱택시", "온다", "우버", "택시")),
             Map.entry("통신비", List.of("SKT", "KT", "LGU+", "알뜰폰", "요금", "통신사")),
@@ -35,7 +35,7 @@ public class CardTransactionService {
             Map.entry("유흥", List.of("술집", "호프", "포차", "맥주", "노래방", "주점")),
             Map.entry("의료비", List.of("병원", "약국", "치과", "한의원", "병원비", "이비인후과", "내과", "안과", "정형외과", "피부과", "정신과", "의원")),
             Map.entry("교육", List.of("학원", "온라인강의", "인강", "과외", "교육비", "수강료", "토익", "자격증", "공부")),
-            Map.entry("정기구독", List.of("넷플릭스", "디즈니플러스", "왓챠", "유튜브프리미엄", "멜론", "벅스", "지니뮤직", "정기결제", "구독", "openai", "gpt", "youtube")),
+            Map.entry("정기구독", List.of("넷플릭스", "netflix", "디즈니플러스", "disney", "왓챠", "유튜브프리미엄", "yt", "멜론", "벅스", "지니뮤직", "정기결제", "구독", "openai", "gpt", "youtube")),
             Map.entry("영화", List.of("CGV", "메가박스", "롯데시네마", "영화관", "영화티켓", "무비", "시네마"))
     );
 
@@ -93,7 +93,9 @@ public class CardTransactionService {
 
     // 자동 재분류
     public int reclassifyUncategorizedTransactions(Long userId) {
+        log.info("사용자 {}의 미분류 거래 조회 시작", userId);
         List<CardTransactionVO> transactions = cardTransactionMapper.findUnclassifiedTransactionsByUser(userId);
+        log.info("미분류 거래 조회 결과: {}건", transactions.size());
         int updatedCount = 0;
 
         for (CardTransactionVO tx : transactions) {

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.savit.notification.mapper.DailyTopSpendingMapper">
+
+    <!-- 일일 최고 지출 데이터 저장 -->
+    <insert id="insertDailyTopSpending">
+        INSERT INTO DailyTopSpending (user_id, target_date, category_name, amount, store_name, created_at, notification_sent)
+        VALUES (#{userId}, #{targetDate}, #{categoryName}, #{amount}, #{storeName}, NOW(), false)
+    </insert>
+
+    <!-- 알림 미발송 데이터 조회 -->
+    <select id="findPendingNotifications" resultType="com.savit.notification.domain.DailyTopSpending">
+        SELECT * FROM DailyTopSpending 
+        WHERE notification_sent = false
+        ORDER BY created_at
+    </select>
+
+    <!-- 알림 발송 완료 처리 -->
+    <update id="markNotificationSent">
+        UPDATE DailyTopSpending 
+        SET notification_sent = true 
+        WHERE id = #{id}
+    </update>
+
+    <!-- 중복 체크 -->
+    <select id="existsByUserAndDate" resultType="boolean">
+        SELECT COUNT(*) > 0 
+        FROM DailyTopSpending 
+        WHERE user_id = #{userId} 
+          AND target_date = #{targetDate}
+    </select>
+
+</mapper>

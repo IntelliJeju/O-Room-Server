@@ -1,5 +1,6 @@
 package com.savit.security;
 
+import com.savit.common.exception.JwtTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,15 +19,15 @@ public class JwtUtil {
         String token = extractTokenFromRequest(request);
 
         if (token == null) {
-            throw new IllegalArgumentException("토큰이 없습니다.");
+            throw new JwtTokenException("토큰이 없습니다.");
         }
 
         if (!jwtTokenProvider.validateToken(token)) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            throw new JwtTokenException("유효하지 않은 토큰입니다.");
         }
 
         if (!jwtTokenProvider.isAccessToken(token)) {
-            throw new IllegalArgumentException("Access Token이 아닙니다.");
+            throw new JwtTokenException("Access Token이 아닙니다.");
         }
 
         String userIdStr = jwtTokenProvider.getUserId(token);
@@ -51,7 +52,7 @@ public class JwtUtil {
      */
     public Long getUserIdFromToken(String token) {
         if (!jwtTokenProvider.validateToken(token)) {
-            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            throw new JwtTokenException("유효하지 않은 토큰입니다.");
         }
 
         String userIdStr = jwtTokenProvider.getUserId(token);
