@@ -1,8 +1,10 @@
 package com.savit.challenge.controller;
 
+import com.google.api.Http;
 import com.savit.challenge.dto.ChallengeDetailDTO;
 import com.savit.challenge.dto.ChallengeListDTO;
 import com.savit.challenge.dto.ChallengeStatusDTO;
+import com.savit.challenge.dto.ChallengeSummaryDTO;
 import com.savit.challenge.service.ChallengeService;
 
 import com.savit.challenge.service.ChallengeStatusService;
@@ -53,4 +55,13 @@ public class ChallengeController {
         ChallengeStatusDTO result = challengeStatusService.getChallengeStatus(challenge_id, userId);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/stats")
+    public ResponseEntity<List<ChallengeSummaryDTO>> getChallengeSummary(HttpServletRequest request) {
+        Long userId = jwtUtil.getUserIdFromToken(request);
+        List<ChallengeSummaryDTO> result = challengeService.getChallengeSummary(userId);
+        return ResponseEntity.ok(result);
+
+    }
+
 }
