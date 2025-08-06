@@ -2,7 +2,7 @@ name: Savit Server CI/CD with Docker
 
 on:
   push:
-    branches: ['dev'] # main 브랜치에 push할 때 실행 (현재 팀 레포상 dev 브랜치에서 트리거 되게끔)
+    branches: ['test/deploy-docker-compose-path'] # main 브랜치에 push할 때 실행 (현재 팀 레포상 dev 브랜치에서 트리거 되게끔)
 
 jobs:
   deploy:
@@ -125,7 +125,21 @@ jobs:
                   - redis_data:/data
                 restart: unless-stopped
                 command: redis-server --appendonly yes
-
+            
+              mysql:
+                image: mysql:8.1.0
+                container_name: savit-mysql
+                ports:
+                  - "3306:3306"
+                restart: unless-stopped
+                environment:
+                  MYSQL_ROOT_PASSWORD: SavitPassword1111!
+                  MYSQL_DATABASE: savit_db
+                  MYSQL_USER: savit
+                  MYSQL_PASSWORD: SavitPassword1111!
+                volumes:
+                  - mysql_data:/var/lib/mysql
+            
               app:
                 image: donghyunn/savit-server
                 container_name: savit-server
