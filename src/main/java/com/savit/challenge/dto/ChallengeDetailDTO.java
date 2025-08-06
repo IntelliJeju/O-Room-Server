@@ -20,4 +20,7 @@ public class ChallengeDetailDTO {
     private BigDecimal entryFee;
     private String categoryName;
     private int eligibility;
+    private int durationWeeks;
+    private Long totalParticipants;
+    private Long joinedParticipants;
 }
