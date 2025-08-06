@@ -8,6 +8,7 @@ import com.savit.challenge.domain.ChallengeVO;
 import com.savit.challenge.dto.ChallengeDetailDTO;
 import com.savit.challenge.dto.ChallengeListDTO;
 import com.savit.challenge.mapper.ChallengeMapper;
+import com.savit.challenge.mapper.ChallengeParticipationMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class ChallengeServiceImpl implements ChallengeService {
     private final CategoryMapper categoryMapper;
     private final CardApprovalMapper cardMapper;
     private final CardTransactionMapper cardTransactionMapper;
+    private final ChallengeParticipationMapper challengeParticipationMapper;
 
     // 리스트 조회
     @Override
@@ -61,17 +63,27 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw new RuntimeException("카테고리 없음");
         }
 
-        // 3. 조건검사: 1/0
+        // 3. entry_fee 계산
+        BigDecimal totalEntryFee = challengeParticipationMapper.sumMyFeeByChallenge(challengeId);
+        if (totalEntryFee == null) {
+            totalEntryFee = BigDecimal.ZERO;
+        }
+
+
+        // 4. 조건검사: 1/0
         int eligibility = checkEligibility(challengeVO, userId);
 
-        // 4. 이제 response 타입인 challengeDetailDTO로 변환해주기
+        // 5. 이제 response 타입인 challengeDetailDTO로 변환해주기
         return ChallengeDetailDTO.builder()
                 .title(challengeVO.getTitle())
                 .description(challengeVO.getDescription())
                 .startDate(challengeVO.getStartDate().toString())
                 .endDate(challengeVO.getEndDate().toString())
-                .entryFee(challengeVO.getEntryFee())
+                .entryFee(totalEntryFee)
                 .categoryName(categoryVO.getName())
+                .durationWeeks(challengeVO.getDurationWeeks())
+                .totalParticipants(challengeVO.getTotalParticipants())
+                .joinedParticipants(challengeVO.getJoinedParticipants())
                 .eligibility(eligibility).build();
     }
 

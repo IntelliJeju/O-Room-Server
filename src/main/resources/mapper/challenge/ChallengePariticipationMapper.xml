@@ -4,21 +4,26 @@
 
     <!-- 참여 여부 확인 -->
     <select id="existsParticipation" resultType="boolean">
-        SELECT EXISTS (
-            SELECT 1 FROM ChallengeParticipation
-            WHERE challenge_id = #{challengeId} AND user_id = #{userId}
-        )
+        SELECT EXISTS (SELECT 1
+                       FROM ChallengeParticipation
+                       WHERE challenge_id = #{challengeId}
+                         AND user_id = #{userId})
     </select>
 
     <!-- 챌린지 참여 삽입 -->
     <insert id="insertParticipation">
-        INSERT INTO ChallengeParticipation (
-            challenge_id, user_id, status, my_fee, created_at
-        ) VALUES (
-                     #{challengeId}, #{userId}, 'PARTICIPATING', #{myFee}, NOW()
-                 )
+        INSERT INTO ChallengeParticipation (challenge_id, user_id, status, my_fee, created_at)
+        VALUES (#{challengeId}, #{userId}, 'PARTICIPATING', #{myFee}, NOW())
     </insert>
 
+    <!--my_fee 합치기-->
+    <select id="sumMyFeeByChallenge" resultType="java.math.BigDecimal">
+        select coalesce(sum(my_fee), 0)
+        from challengeParticipation
+        where challenge_id = #{challengeId}
+
+    </select>
+  
     <!-- challenge 타입 amount 일때, 참여자들 현황 -->
     <select id="selectParticipantsWithAmount" resultType="com.savit.challenge.dto.ParticipantInfo">
         select u.nickname          as nickName,
