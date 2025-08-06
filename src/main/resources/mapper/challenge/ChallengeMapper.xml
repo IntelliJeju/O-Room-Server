@@ -123,4 +123,34 @@
         ]]>
     </select>
 
+    <select id="selectChallengeType" resultType="java.lang.String">
+        select type from challenge where id = #{challengeId}
+    </select>
+
+    <!--현황 조회-->
+    <select id="selectChallengeStatus" resultType="com.savit.challenge.dto.ChallengeStatusDTO">
+        SELECT c.title,
+               DATE_FORMAT(c.start_date, '%Y-%m-%d') AS startDate,
+               DATE_FORMAT(c.end_date, '%Y-%m-%d') AS endDate,
+               c.target_amount AS targetAmount,
+               c.target_count AS targetCount,
+               c.type,
+               COUNT(cp.id) AS joinedParticipants,
+               COUNT(CASE WHEN cp.status = 'PARTICIPATING' THEN 1 END) AS participatingParticipants,
+               SUM(cp.my_fee) AS entryFee,
+               MAX(CASE WHEN cp.user_id = #{userId} THEN cp.my_fee END) AS myFee,
+               CASE
+                   WHEN COUNT(CASE WHEN cp.status = 'PARTICIPATING' THEN 1 END) = 0 THEN 0
+                   ELSE ROUND(
+                           SUM(CASE WHEN cp.status = 'FAIL' THEN cp.my_fee ELSE 0 END) /
+                           COUNT(CASE WHEN cp.status = 'PARTICIPATING' THEN 1 END),
+                           2
+                        )
+                   END AS expectedPrize
+        FROM Challenge c
+                 LEFT JOIN ChallengeParticipation cp ON c.id = cp.challenge_id
+        WHERE c.id = #{challengeId}
+        GROUP BY c.id, c.title, c.start_date, c.end_date, c.target_amount, c.target_count, c.type
+    </select>
+
 </mapper>
