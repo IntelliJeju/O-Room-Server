@@ -6,11 +6,11 @@
 <mapper namespace="com.savit.budget.mapper.CategoryMapper">
 
     <select id="findById" parameterType="long" resultType="com.savit.budget.domain.CategoryVO">
-        SELECT * FROM category WHERE id = #{id}
+        SELECT * FROM Category WHERE id = #{id}
     </select>
 
     <select id="findByName" parameterType="string" resultType="com.savit.budget.domain.CategoryVO">
-        SELECT * FROM category WHERE name = #{name}
+        SELECT * FROM Category WHERE name = #{name}
     </select>
 
 </mapper>

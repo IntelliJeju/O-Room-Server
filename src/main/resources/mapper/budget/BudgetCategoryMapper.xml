@@ -4,16 +4,16 @@
 
 
     <insert id="insertBudgetCategory">
-        INSERT INTO budgetcategory (target_amount, budget_id, category_id)
+        INSERT INTO Budgetcategory (target_amount, budget_id, category_id)
         VALUES ( #{targetAmount}, #{budgetId},#{categoryId})
     </insert>
     <update id="updateBudgetCategory">
-        update budgetcategory set target_amount = #{targetAmount}
+        update Budgetcategory set target_amount = #{targetAmount}
         where budget_id = #{budgetId} and category_id = #{categoryId}
     </update>
 
     <select id="getBudgetCategories" resultType="com.savit.budget.domain.BudgetCategoryVO">
-        SELECT * FROM budgetcategory
+        SELECT * FROM Budgetcategory
         WHERE budget_id = #{budgetId}
         <if test="categoryIds != null and categoryIds.size() > 0">
             AND category_id IN

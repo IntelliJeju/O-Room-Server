@@ -20,26 +20,26 @@
     <!-- 이메일로 사용자 조회 -->
     <select id="findByEmail" parameterType="String" resultMap="userResultMap">
         SELECT id, email, nickname, profile_image, created_at, updated_at, kakao_user_id
-        FROM user
+        FROM User
         WHERE email = #{email}
     </select>
 
     <!-- 카카오 사용자 ID로 사용자 조회 -->
     <select id="findByKakaoUserId" parameterType="String" resultMap="userResultMap">
         SELECT id, email, nickname, profile_image, created_at, updated_at, kakao_user_id
-        FROM user
+        FROM User
         WHERE kakao_user_id = #{kakaoUserId}
     </select>
 
     <!-- 사용자 생성 -->
     <insert id="insertUser" parameterType="com.savit.user.domain.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (email, nickname, profile_image, created_at, updated_at, kakao_user_id, connected_id, refresh_token, birth_date)
+        INSERT INTO User (email, nickname, profile_image, created_at, updated_at, kakao_user_id, connected_id, refresh_token, birth_date)
         VALUES (#{email}, #{nickname}, #{profileImage}, #{createdAt}, #{updatedAt}, #{kakaoUserId}, #{connectedId}, #{refreshToken}, #{birthDate})
     </insert>
 
     <!-- 사용자 정보 업데이트 -->
     <update id="updateUser" parameterType="com.savit.user.domain.User">
-        UPDATE user
+        UPDATE User
         SET nickname = #{nickname},
         profile_image = #{profileImage},
         updated_at = #{updatedAt},
