@@ -154,6 +154,7 @@ jobs:
 
             volumes:
               redis_data:
+              mysql_data:
             EOF
 
             # 기존 컨테이너들 정리
