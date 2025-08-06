@@ -1,5 +1,6 @@
 package com.savit.challenge.mapper;
 
+import com.savit.challenge.dto.ChallengeSummaryDTO;
 import com.savit.challenge.dto.ParticipantInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -21,4 +22,6 @@ public interface ChallengeParticipationMapper {
   
     List<ParticipantInfo> selectParticipantsWithAmount(Long challengeId);
     List<ParticipantInfo> selectParticipantsWithCount(Long challengeId);
+
+    List<ChallengeSummaryDTO>  selectChallengeSummary(Long userId);
 }
