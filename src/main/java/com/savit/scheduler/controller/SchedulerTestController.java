@@ -4,8 +4,11 @@ import com.savit.budget.service.BudgetMonitoringService;
 import com.savit.card.dto.BudgetMonitoringDTO;
 import com.savit.card.service.AsyncCardApprovalService;
 import com.savit.card.service.CardApprovalService;
-import com.savit.notification.service.NotificationService;
-import com.savit.scheduler.job.*;
+import com.savit.scheduler.job.CardApprovalScheduler;
+import com.savit.scheduler.job.RandomNaggingScheduler;
+import com.savit.scheduler.job.ChallengeDropoutScheduler;
+import com.savit.scheduler.job.DailyTopSpendingScheduler;
+import com.savit.scheduler.job.ChallengeScheduleNotificationScheduler;
 import com.savit.user.mapper.UserMapper;
 import com.savit.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +36,7 @@ public class SchedulerTestController {
     private final AsyncCardApprovalService asyncCardApprovalService;
     private final BudgetMonitoringService budgetMonitoringService;
     private final CardApprovalService cardApprovalService;
-    private final NotificationService notificationService;
     private final UserMapper userMapper;
-
     private final ChallengeDropoutScheduler challengeDropoutScheduler;
     private final DailyTopSpendingScheduler dailyTopSpendingScheduler;
     private final ChallengeScheduleNotificationScheduler challengeScheduleNotificationScheduler;
