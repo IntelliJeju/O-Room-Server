@@ -70,7 +70,7 @@ public class CardTransactionService {
             return;
         }
 
-        cardTransactionMapper.updateCategory(transactionId, category.getId(), category.getName());
+        cardTransactionMapper.updateCategory(transactionId, category.getId());
     }
 
     // 수동 카테고리 지정
@@ -88,7 +88,7 @@ public class CardTransactionService {
             throw new IllegalArgumentException("해당 카테고리 ID를 찾을 수 없습니다: " + categoryId);
         }
 
-        cardTransactionMapper.updateCategory(transactionId, categoryId, category.getName());
+        cardTransactionMapper.updateCategory(transactionId, categoryId);
     }
 
     // 자동 재분류
@@ -101,7 +101,7 @@ public class CardTransactionService {
         for (CardTransactionVO tx : transactions) {
             try {
                 CategoryVO category = classifyCategory(tx.getResMemberStoreName(), tx.getResMemberStoreType());
-                cardTransactionMapper.updateCategory(tx.getId(), category.getId(), category.getName());
+                cardTransactionMapper.updateCategory(tx.getId(), category.getId());
                 updatedCount++;
             } catch (Exception e) {
                 log.warn("자동 분류 실패 - txId: {}, error: {}", tx.getId(), e.getMessage());

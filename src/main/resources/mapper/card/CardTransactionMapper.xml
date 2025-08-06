@@ -23,7 +23,6 @@
     <update id="updateCategory">
         UPDATE CardTransaction
         SET category_id = #{categoryId},
-            res_member_store_type = #{resMemberStoreType},
             updated_at = NOW()
         WHERE id = #{transactionId}
     </update>
