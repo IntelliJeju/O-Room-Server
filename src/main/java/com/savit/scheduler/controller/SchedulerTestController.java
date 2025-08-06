@@ -5,10 +5,7 @@ import com.savit.card.dto.BudgetMonitoringDTO;
 import com.savit.card.service.AsyncCardApprovalService;
 import com.savit.card.service.CardApprovalService;
 import com.savit.notification.service.NotificationService;
-import com.savit.scheduler.job.CardApprovalScheduler;
-import com.savit.scheduler.job.RandomNaggingScheduler;
-import com.savit.scheduler.job.ChallengeDropoutScheduler;
-import com.savit.scheduler.job.DailyTopSpendingScheduler;
+import com.savit.scheduler.job.*;
 import com.savit.user.mapper.UserMapper;
 import com.savit.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +38,7 @@ public class SchedulerTestController {
 
     private final ChallengeDropoutScheduler challengeDropoutScheduler;
     private final DailyTopSpendingScheduler dailyTopSpendingScheduler;
+    private final ChallengeScheduleNotificationScheduler challengeScheduleNotificationScheduler;
 
 
     /**
@@ -297,6 +295,32 @@ public class SchedulerTestController {
 
         } catch (Exception e) {
             log.error("일일 최고 지출 알림 발송 테스트 실패", e);
+            response.put("status", "error");
+            response.put("message", "실행 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 챌린지 시작/종료 하루 전 알림 테스트 (수동 실행)
+     */
+    @PostMapping("/challenge/schedule-notification")
+    public ResponseEntity<Map<String, Object>> testChallengeScheduleNotification() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            log.info("=== 챌린지 일정 알림 스케줄러 수동 테스트 시작 ===");
+
+            challengeScheduleNotificationScheduler.sendChallengeScheduleNotifications();
+
+            response.put("status", "success");
+            response.put("message", "챌린지 일정 알림 스케줄러 실행 완료");
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("챌린지 일정 알림 테스트 실패", e);
             response.put("status", "error");
             response.put("message", "실행 실패: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);
