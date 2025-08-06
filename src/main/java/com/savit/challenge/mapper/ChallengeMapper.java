@@ -2,6 +2,7 @@ package com.savit.challenge.mapper;
 
 import com.savit.challenge.domain.ChallengeVO;
 import com.savit.challenge.dto.ChallengeListDTO;
+import com.savit.challenge.dto.ChallengeStatusDTO;
 import com.savit.challenge.dto.ChallengeDropoutSummaryDTO;
 import com.savit.notification.dto.ChallengeNotificationDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -12,7 +13,6 @@ import java.util.List;
 
 @Mapper
 public interface ChallengeMapper {
-    List<ChallengeListDTO> getChallengeList();
 
     // 시작일 기준
     List<ChallengeNotificationDTO> findByStartDate(@Param("startDate") LocalDate startDate);
@@ -34,6 +34,11 @@ public interface ChallengeMapper {
     // 참여중인 챌린지 조회
     List<ChallengeListDTO> findParticipatingChallenges(Long userId);
 
+    // 챌린지 타입 찾기
+    String selectChallengeType(Long challengeId);
+
+    //챌린지 현황 조회
+    ChallengeStatusDTO selectChallengeStatus(@Param("challengeId") Long challengeId, @Param("userId") Long userId);
     // 진행 중인 챌린지별 낙오 요약 통계 조회
     List<ChallengeDropoutSummaryDTO> getChallengeDropoutSummaries();
 
