@@ -63,22 +63,6 @@
         order by c.start_date asc
     </select>
 
-    <select id="findById" resultType="com.savit.challenge.domain.ChallengeVO">
-        select id,
-               title,
-               description,
-               start_date,
-               end_date,
-               total_participants,
-               joined_participants,
-               target_count,
-               target_amount,
-               type,
-               duration_weeks,
-               category_id
-        from Challenge
-        where id = #{id}
-    </select>
 
     <select id="findParticipatingChallenges" resultType="com.savit.challenge.dto.ChallengeListDTO">
         select cp.challenge_id, c.title, c.start_date, c.end_date
@@ -146,6 +130,40 @@
                  LEFT JOIN ChallengeParticipation cp ON c.id = cp.challenge_id
         WHERE c.id = #{challengeId}
         GROUP BY c.id, c.title, c.start_date, c.end_date, c.target_amount, c.target_count, c.type
+    </select>
+
+    <select id="findById" resultType="com.savit.challenge.domain.ChallengeVO">
+        select id,
+               title,
+               description,
+               start_date,
+               end_date,
+               total_participants,
+               joined_participants,
+               target_count,
+               target_amount,
+               type,
+               duration_weeks,
+               category_id
+        from Challenge
+        where id = #{id}
+    </select>
+
+    <select id="findChallengesEndingOnDate" resultType="com.savit.challenge.domain.ChallengeVO">
+        select id,
+               title,
+               description,
+               strat_date,
+               end_date,
+               target_count,
+               target_amount,
+               type,
+               duration_weeks,
+               category_id,
+               total_participants,
+               joined_participants
+        from Challenge
+        where end_date = # {endDate} and start_date &lt;= #{endDate} oreder by id
     </select>
 
 </mapper>
