@@ -47,7 +47,7 @@ public interface ChallengeMapper {
     List<Long> findParticipantUserIdsByChallengeId(@Param("challengeId") Long challengeId);
 
     // 특정 날짜에 종료되는 챌린지 조회
-    List<ChallengeVO> findChallengesEndingOnDate(String enddDate);
+    List<ChallengeVO> findChallengesEndingOnDate(String endDate);
 
     // 상세조회
     ChallengeVO findById(Long challengeId);

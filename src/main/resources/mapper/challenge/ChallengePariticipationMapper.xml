@@ -19,7 +19,7 @@
     <!--my_fee 합치기-->
     <select id="sumMyFeeByChallenge" resultType="java.math.BigDecimal">
         select coalesce(sum(my_fee), 0)
-        from challengeParticipation
+        from ChallengeParticipation
         where challenge_id = #{challengeId}
 
     </select>
@@ -29,7 +29,7 @@
         select u.nickname          as nickName,
                cp.challenge_amount as challengeAmount,
                cp.status
-        from challengeParticipation as cp
+        from ChallengeParticipation as cp
                  inner join user as u
                             on cp.user_id = u.id
         where cp.challenge_id = #{challengeId}
@@ -38,7 +38,7 @@
     <!-- challenge 타입 count 일때, 참여자들 현황-->
     <select id="selectParticipantsWithCount" resultType="com.savit.challenge.dto.ParticipantInfo">
         select u.nickname as nickName, cp.challenge_count as challengeCount, cp.status
-        from challengeParticipation as cp
+        from ChallengeParticipation as cp
                  inner join user as u on cp.user_id = u.id
         where cp.challenge_id = #{challengeId}
     </select>
@@ -47,7 +47,7 @@
                cp.user_id,
                cp.challenge_id,
                c.category_id,
-               c.type              as challenge_type,
+               c.type              as type,
                cp.status           as current_status,
                c.start_date,
                c.end_date,
@@ -63,6 +63,7 @@
           and c.end_date <![CDATA[>=]]> CURDATE()
         order by cp.id
     </select>
+
     <select id="findParticipatingUsersByChallengeId"
             resultType="com.savit.challenge.dto.ParticipationStatusDTO">
 
@@ -70,7 +71,7 @@
                cp.user_id,
                cp.challenge_id,
                c.category_id,
-               c.type              as challenge_type,
+               c.type              as type,
                cp.status           as current_status,
                c.start_date,
                c.end_date,
@@ -91,7 +92,7 @@
             cp.user_id,
             cp.challenge_id,
             c.category_id,
-            c.type as challenge_type,
+            c.type as type,
             cp.status as current_status,
             c.start_date,
             c.end_date,
@@ -105,14 +106,14 @@
     </select>
 
     <update id="updateChallengeProgress">
-        update ChallegnePaticipation set challenge_count = #{count}, challenge_amount = #{amount}, updated_at = now() where id = #{participationId}
+        update ChallengeParticipation set challenge_count = #{count}, challenge_amount = #{amount}, updated_at = now() where id = #{participationId}
     </update>
 
     <update id="updateStatusToFail">
         update ChallengeParticipation
         set status       = 'FAIL',
             challenge_count = #{updatedCount},
-            challegne_amount = #{updatedAmount},
+            challenge_amount = #{updatedAmount},
             completed_at = #{completedAt},
             updated_at   = now()
         where id = #{participationId}

@@ -46,7 +46,7 @@ public interface CardTransactionMapper {
 
     // 특정 사용자의 특정 카테고리별 누적 금액 조회(챌린지 기간 내)
     BigDecimal sumAmountByCategoryAndPeriod(@Param("userId") Long userId,
-                                            @Param("categoryId") Long cateogryId,
+                                            @Param("categoryId") Long categoryId,
                                             @Param("startDate") String startDate,
                                             @Param("endDate") String endDate);
 

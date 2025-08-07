@@ -84,7 +84,7 @@ public class ChallengeCompletionServiceImpl implements ChallengeCompletionServic
             }
             log.info("챌린지 {} - 진행중인 참여자 : {}명", challenge.getId(), participatingUsers.size());
 
-            // 2. 모든 진행중인 참여자를 성공을 ㅗ처리
+            // 2. 모든 진행중인 참여자를 성공으로 처리
             List<Long> participationIds = participatingUsers.stream().map(ParticipationStatusDTO::getParticipationId).collect(Collectors.toList());
 
             updateSuccessfulParticipants(participationIds);

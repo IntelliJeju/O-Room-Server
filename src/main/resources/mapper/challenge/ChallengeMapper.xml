@@ -153,7 +153,7 @@
         select id,
                title,
                description,
-               strat_date,
+               start_date,
                end_date,
                target_count,
                target_amount,
@@ -163,7 +163,7 @@
                total_participants,
                joined_participants
         from Challenge
-        where end_date = # {endDate} and start_date &lt;= #{endDate} oreder by id
+        where end_date = #{endDate} and start_date &lt;= #{endDate} order by id
     </select>
 
 </mapper>

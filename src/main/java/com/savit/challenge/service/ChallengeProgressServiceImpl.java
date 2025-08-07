@@ -27,8 +27,8 @@ public class ChallengeProgressServiceImpl implements ChallengeProgressService{
             log.debug("챌린지 진행상황 계산 시작 - 참여자 :{}, 거래: {}", participant.getParticipationId(), transaction.getId());
 
             // 1) 현재 누적값 가져오기
-            Long currentCount = getCurrentCount(participant);
-            BigDecimal currentAmount = getCurrentAmount(participant);
+            Long currentCount = participant.getCurrentCount();
+            BigDecimal currentAmount = participant.getCurrentAmount();
 
             // 2) 새로운 거래 반영
             Long updatedCount = currentCount;
