@@ -89,4 +89,39 @@
         LIMIT 1
     </select>
 
+    <!-- 예치금 가상 결제 카드 트랜잭션 1건 저장 -->
+    <insert id="insert" parameterType="com.savit.card.domain.CardTransactionVO">
+        INSERT INTO CardTransaction (
+            card_id,
+            res_card_no,
+            res_used_date,
+            res_used_time,
+            res_used_amount,
+            res_cancel_yn,
+            res_cancel_amount,
+            res_total_amount,
+            budget_category_id,
+            category_id,
+            res_member_store_name,
+            res_member_store_type,
+            created_at,
+            updated_at
+        ) VALUES (
+                     #{cardId},
+                     #{resCardNo},
+                     #{resUsedDate},
+                     #{resUsedTime},
+                     #{resUsedAmount},
+                     #{resCancelYn},
+                     #{resCancelAmount},
+                     #{resTotalAmount},
+                     #{budgetCategoryId},
+                     #{categoryId},
+                     #{resMemberStoreName},
+                     #{resMemberStoreType},
+                     NOW(),
+                     NOW()
+                 )
+    </insert>
+
 </mapper>

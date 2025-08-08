@@ -36,4 +36,6 @@ public interface CardTransactionMapper {
     @MapKey("id") // 단일 결과여서 없어도 되는데 빨간 오류줄 없애려고 추가
     Map<String, Object> findTopSpendingByUserAndDate(@Param("userId") Long userId,
                                                      @Param("targetDate") String targetDate);
+
+    void insert(CardTransactionVO transaction);
 }
