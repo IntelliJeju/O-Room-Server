@@ -1,7 +1,9 @@
 package com.savit.challenge.mapper;
 
+import com.savit.challenge.dto.ChallengeUpdateRequestDTO;
 import com.savit.challenge.dto.ChallengeSummaryDTO;
 import com.savit.challenge.dto.ParticipantInfo;
+import com.savit.challenge.dto.ParticipationStatusDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -23,5 +25,23 @@ public interface ChallengeParticipationMapper {
     List<ParticipantInfo> selectParticipantsWithAmount(Long challengeId);
     List<ParticipantInfo> selectParticipantsWithCount(Long challengeId);
 
+    // 특정 카테고리의 진행중인 챌린지 참여자들 조회
+    List<ParticipationStatusDTO> findActiveParticipantsByCategory(Long categoryId);
+
+    // 특정 챌린지의 진행중인 참여자들 조회( 종료일 체크용)
+    List<ParticipationStatusDTO> findParticipatingUsersByChallengeId(Long challengeId);
+
+    // 챌린지 참여자 진행상황 업데이트
+    void updateChallengeProgress(@Param("participationId") Long participationId, @Param("count") Long count, @Param("amount") BigDecimal amount);
+
+    // 챌린지 상태 Fail 로
+    void updateStatusToFail(ChallengeUpdateRequestDTO request);
+
+    // 챌린지 상태 success 로 일괄 변경
+    void updateStatusToSuccess(@Param("participationIds") List<Long> participationIds, @Param("completedAt") String completedAt);
+
+    // 특정 참여자의 현재 진행상황 조회
+    ParticipationStatusDTO findParticipationById (Long participationId);
+  
     List<ChallengeSummaryDTO>  selectChallengeSummary(Long userId);
 }

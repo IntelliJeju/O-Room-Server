@@ -19,17 +19,17 @@
     <!--my_fee 합치기-->
     <select id="sumMyFeeByChallenge" resultType="java.math.BigDecimal">
         select coalesce(sum(my_fee), 0)
-        from challengeParticipation
+        from ChallengeParticipation
         where challenge_id = #{challengeId}
 
     </select>
-  
+
     <!-- challenge 타입 amount 일때, 참여자들 현황 -->
     <select id="selectParticipantsWithAmount" resultType="com.savit.challenge.dto.ParticipantInfo">
         select u.nickname          as nickName,
                cp.challenge_amount as challengeAmount,
                cp.status
-        from challengeParticipation as cp
+        from ChallengeParticipation as cp
                  inner join user as u
                             on cp.user_id = u.id
         where cp.challenge_id = #{challengeId}
@@ -38,10 +38,91 @@
     <!-- challenge 타입 count 일때, 참여자들 현황-->
     <select id="selectParticipantsWithCount" resultType="com.savit.challenge.dto.ParticipantInfo">
         select u.nickname as nickName, cp.challenge_count as challengeCount, cp.status
-        from challengeParticipation as cp
+        from ChallengeParticipation as cp
                  inner join user as u on cp.user_id = u.id
         where cp.challenge_id = #{challengeId}
     </select>
+    <select id="findActiveParticipantsByCategory" resultType="com.savit.challenge.dto.ParticipationStatusDTO">
+        select cp.id               as participation_id,
+               cp.user_id,
+               cp.challenge_id,
+               c.category_id,
+               c.type              as type,
+               cp.status           as current_status,
+               c.start_date,
+               c.end_date,
+               c.target_count,
+               c.target_amount,
+               cp.challenge_count  as current_count,
+               cp.challenge_amount as current_amount
+        from ChallengeParticipation cp
+                 Inner Join Challenge as c on cp.challenge_id = c.id
+        where c.category_id = #{categoryId}
+          and cp.status = 'PARTICIPATING'
+          and c.start_date <![CDATA[<=]]> CURDATE()
+          and c.end_date <![CDATA[>=]]> CURDATE()
+        order by cp.id
+    </select>
+
+    <select id="findParticipatingUsersByChallengeId"
+            resultType="com.savit.challenge.dto.ParticipationStatusDTO">
+
+        select cp.id               as participation_id,
+               cp.user_id,
+               cp.challenge_id,
+               c.category_id,
+               c.type              as type,
+               cp.status           as current_status,
+               c.start_date,
+               c.end_date,
+               c.target_count,
+               c.target_amount,
+               cp.challenge_count  as current_count,
+               cp.challenge_amount as current_amount
+        from ChallengeParticipation as cp
+                 inner join Challenge as c on cp.challenge_id = c.id
+        where cp.challenge_id = #{challengeId}
+          and cp.status = 'PARTICIPATING'
+        order by cp.id
+    </select>
+
+    <select id="findParticipationById" resultType="com.savit.challenge.dto.ParticipationStatusDTO">
+        select
+            cp.id as participation_id,
+            cp.user_id,
+            cp.challenge_id,
+            c.category_id,
+            c.type as type,
+            cp.status as current_status,
+            c.start_date,
+            c.end_date,
+            c.target_count,
+            c.target_amount,
+            cp.challenge_count as current_count,
+            cp.challenge_amount as current_amount
+        from ChallengeParticipation as cp
+        inner join Challenge as c on cp.challenge_id = c.id
+        where cp.id = #{participationId}
+    </select>
+
+    <update id="updateChallengeProgress">
+        update ChallengeParticipation set challenge_count = #{count}, challenge_amount = #{amount}, updated_at = now() where id = #{participationId}
+    </update>
+
+    <update id="updateStatusToFail">
+        update ChallengeParticipation
+        set status       = 'FAIL',
+            challenge_count = #{updatedCount},
+            challenge_amount = #{updatedAmount},
+            completed_at = #{completedAt},
+            updated_at   = now()
+        where id = #{participationId}
+    </update>
+    <update id="updateStatusToSuccess">
+        update ChallengeParticipation set status = 'SUCCESS' , completed_at =#{completedAt},updated_at = now()
+        where id in
+        <foreach collection="participationIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
 
     <select id="selectChallengeSummary" resultType="com.savit.challenge.dto.ChallengeSummaryDTO">
         select cp.challenge_id, c.title, c.start_date,  c.end_date,
