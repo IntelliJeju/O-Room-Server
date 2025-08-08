@@ -124,5 +124,12 @@
         <foreach collection="participationIds" item="id" open="(" separator="," close=")">#{id}</foreach>
     </update>
 
+    <select id="selectChallengeSummary" resultType="com.savit.challenge.dto.ChallengeSummaryDTO">
+        select cp.challenge_id, c.title, c.start_date,  c.end_date,
+           cp.status, cp.my_fee, cp.prize
+        from challengeParticipation as cp join challenge as c on cp.challenge_id =c.id
+        where cp.user_id = #{userId}  and cp.status IN ('SUCCESS', 'FAIL')
+    </select>
+
 
 </mapper>

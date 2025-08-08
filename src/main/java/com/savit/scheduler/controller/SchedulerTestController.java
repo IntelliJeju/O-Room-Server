@@ -5,10 +5,7 @@ import com.savit.card.dto.BudgetMonitoringDTO;
 import com.savit.card.service.AsyncCardApprovalService;
 import com.savit.card.service.CardApprovalService;
 import com.savit.notification.service.NotificationService;
-import com.savit.scheduler.job.CardApprovalScheduler;
-import com.savit.scheduler.job.RandomNaggingScheduler;
-import com.savit.scheduler.job.ChallengeDropoutScheduler;
-import com.savit.scheduler.job.DailyTopSpendingScheduler;
+import com.savit.scheduler.job.*;
 import com.savit.user.mapper.UserMapper;
 import com.savit.user.domain.User;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +38,7 @@ public class SchedulerTestController {
 
     private final ChallengeDropoutScheduler challengeDropoutScheduler;
     private final DailyTopSpendingScheduler dailyTopSpendingScheduler;
+    private final ChallengeStartNotificationScheduler challengeStartNotificationScheduler;
 
 
     /**
@@ -113,7 +111,7 @@ public class SchedulerTestController {
 
             // 예산 데이터 조회해서 응답에 포함
             BudgetMonitoringDTO budgetData =
-                cardApprovalService.getBudgetMonitoringData(userId);
+                    cardApprovalService.getBudgetMonitoringData(userId);
 
             response.put("status", "success");
             response.put("message", "사용자 " + userId + " 예산 모니터링 완료");
@@ -210,9 +208,9 @@ public class SchedulerTestController {
             response.put("status", "active");
             response.put("message", "스케줄러가 정상 동작 중입니다");
             response.put("schedulers", Map.of(
-                "cardApprovalScheduler", "08:00, 12:00, 18:00, 00:00 실행",
-                "randomNaggingScheduler", "매 30분마다 실행 (07:00-01:00)",
-                "healthCheckScheduler", "매시간 정각 실행"
+                    "cardApprovalScheduler", "08:00, 12:00, 18:00, 00:00 실행",
+                    "randomNaggingScheduler", "매 30분마다 실행 (07:00-01:00)",
+                    "healthCheckScheduler", "매시간 정각 실행"
             ));
             response.put("timestamp", System.currentTimeMillis());
 
@@ -251,7 +249,7 @@ public class SchedulerTestController {
         }
     }
 
-     /**
+    /**
      * 일일 최고 지출 데이터 수집 테스트
      */
     @PostMapping("/daily-top-spending/collect")
@@ -302,4 +300,58 @@ public class SchedulerTestController {
             return ResponseEntity.internalServerError().body(response);
         }
     }
+
+    /**
+     * 내일 시작하는 챌린지 알림 테스트
+     */
+    @PostMapping("/challenge-start/tomorrow")
+    public ResponseEntity<Map<String, Object>> testTomorrowChallengeStartNotifications() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            log.info("=== 내일 시작 챌린지 알림 수동 테스트 시작 ===");
+
+            challengeStartNotificationScheduler.sendTomorrowChallengeStartNotifications();
+
+            response.put("status", "success");
+            response.put("message", "내일 시작 챌린지 알림 발송 완료");
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("내일 시작 챌린지 알림 테스트 실패", e);
+            response.put("status", "error");
+            response.put("message", "실행 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 오늘 시작하는 챌린지 알림 테스트
+     */
+    @PostMapping("/challenge-start/today")
+    public ResponseEntity<Map<String, Object>> testTodayChallengeStartNotifications() {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            log.info("=== 오늘 시작 챌린지 알림 수동 테스트 시작 ===");
+
+            challengeStartNotificationScheduler.sendTodayChallengeStartNotifications();
+
+            response.put("status", "success");
+            response.put("message", "오늘 시작 챌린지 알림 발송 완료");
+            response.put("timestamp", System.currentTimeMillis());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("오늘 시작 챌린지 알림 테스트 실패", e);
+            response.put("status", "error");
+            response.put("message", "실행 실패: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+
 }

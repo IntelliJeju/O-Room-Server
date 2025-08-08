@@ -7,6 +7,7 @@ import com.savit.card.mapper.CardTransactionMapper;
 import com.savit.challenge.domain.ChallengeVO;
 import com.savit.challenge.dto.ChallengeDetailDTO;
 import com.savit.challenge.dto.ChallengeListDTO;
+import com.savit.challenge.dto.ChallengeSummaryDTO;
 import com.savit.challenge.mapper.ChallengeMapper;
 import com.savit.challenge.mapper.ChallengeParticipationMapper;
 import lombok.RequiredArgsConstructor;
@@ -129,4 +130,10 @@ public class ChallengeServiceImpl implements ChallengeService {
     public List<ChallengeListDTO> getParticipatingChallenges(Long userId) {
         return challengeMapper.findParticipatingChallenges(userId);
     }
+
+    @Override
+    public List<ChallengeSummaryDTO> getChallengeSummary(Long userId) {
+        return challengeParticipationMapper.selectChallengeSummary(userId);
+    }
+
 }

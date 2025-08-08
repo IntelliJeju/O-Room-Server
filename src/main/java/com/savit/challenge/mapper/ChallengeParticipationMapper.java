@@ -1,6 +1,7 @@
 package com.savit.challenge.mapper;
 
 import com.savit.challenge.dto.ChallengeUpdateRequestDTO;
+import com.savit.challenge.dto.ChallengeSummaryDTO;
 import com.savit.challenge.dto.ParticipantInfo;
 import com.savit.challenge.dto.ParticipationStatusDTO;
 import org.apache.ibatis.annotations.Mapper;
@@ -41,4 +42,6 @@ public interface ChallengeParticipationMapper {
 
     // 특정 참여자의 현재 진행상황 조회
     ParticipationStatusDTO findParticipationById (Long participationId);
+  
+    List<ChallengeSummaryDTO>  selectChallengeSummary(Long userId);
 }
