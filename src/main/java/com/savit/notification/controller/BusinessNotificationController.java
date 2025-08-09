@@ -14,10 +14,6 @@ import java.util.Map;
 @RequestMapping("/api/business/notifications")
 @RequiredArgsConstructor
 public class BusinessNotificationController {
-    /**
-     *
-     */
-    
     private final NotificationService notificationService;
     
     /**

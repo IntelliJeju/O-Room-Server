@@ -1,6 +1,8 @@
 package com.savit.card.service;
 
 import com.savit.budget.service.BudgetMonitoringService;
+import com.savit.challenge.mapper.ChallengeParticipationMapper;
+import com.savit.challenge.service.ChallengeParticipationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,6 +21,7 @@ public class AsyncCardApprovalService {
     
     private final CardApprovalService cardApprovalService;
     private final BudgetMonitoringService budgetMonitoringService;
+    private final ChallengeParticipationService challengeParticipationService;
     
     /**
      * 내부 메서드 호출 방식 - 단일 사용자 카드 승인내역 비동기 처리
@@ -33,11 +36,20 @@ public class AsyncCardApprovalService {
             
             // 내부 메서드 호출 방식 - 사용자의 모든 카드 처리
             boolean hasNewTransactions = cardApprovalService.fetchAndSaveAllCardsWithBudgetCheck(userId);
-            
+
             // 새로운 거래내역이 있으면 예산 체크 및 알림 발송
             if (hasNewTransactions) {
                 log.info("사용자 {} 새 거래내역 발견 - 예산 모니터링 시작", userId);
                 budgetMonitoringService.checkBudgetAndSendNotifications(userId);
+
+                // 챌린지 참여자 상태 업데이트
+                try {
+                    challengeParticipationService.updateChallengeProgressForNewTransactions();
+                    log.debug("사용자 {} 챌린지 상태 업데이트 완료", userId);
+                } catch (Exception e) {
+                    log.error("사용자 {} 챌린지 상태 업데이트 실패 - 예산 모니터링은 정상 처리됨", userId,e);
+                    // 챌린지 처리 실패가 전체 프로세스 중단시키지 않도록 continue~
+                }
             } else {
                 log.debug("사용자 {} 새 거래내역 없음", userId);
             }
@@ -67,6 +79,12 @@ public class AsyncCardApprovalService {
             if (hasNewTransactions) {
                 log.info("사용자 {} 카드 {} 새 거래내역 발견 - 예산 모니터링 시작", userId, cardId);
                 budgetMonitoringService.checkBudgetAndSendNotifications(userId);
+                try {
+                    challengeParticipationService.updateChallengeProgressForNewTransactions();
+                    log.debug("사용자 {} 카드 {} 챌린지 상태 업데이트 완료", userId, cardId);
+                } catch (Exception e) {
+                    log.error("사용자 {} 카드 {} 챌린지 상태 업데이트 실패", userId, cardId, e);
+                }
             } else {
                 log.debug("사용자 {} 카드 {} 새 거래내역 없음", userId, cardId);
             }

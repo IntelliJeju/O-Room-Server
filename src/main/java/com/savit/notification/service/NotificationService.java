@@ -1,6 +1,7 @@
 package com.savit.notification.service;
 
 import com.google.firebase.messaging.*;
+import com.savit.openai.service.OpenAIInternalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import com.savit.notification.domain.UserFcmToken;
 import com.savit.notification.mapper.NotificationMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -19,6 +21,7 @@ public class NotificationService {
 
     private final FirebaseMessaging firebaseMessaging;
     private final NotificationMapper notificationMapper;
+    private final OpenAIInternalService openAIInternalService;
 
     public String sendNotification(PushNotificationRequest request) {
         return sendNotification(request, null);
@@ -147,7 +150,46 @@ public class NotificationService {
      * 랜덤 잔소리 알림
      */
     public void sendRandomNaggingNotification(Long userId) {
-        String[] naggingMessages = {
+        String naggingMessage = getRandomNaggingMessage();
+        String title = "💬 Savit 한마디";
+        sendNotificationToUser(userId, title, naggingMessage);
+        log.info("랜덤 잔소리 알림 전송 완료 - 사용자: {}, 메시지: {}", userId, naggingMessage);
+
+    }
+
+    /**
+     * GPT 프롬프팅 응답 결과로 나온 잔소리 메세지
+     * 또는 디폴트 메세지 전송
+     * @return aiMessage or defaultMessage
+     */
+    private String getRandomNaggingMessage() {
+        try {
+            if(openAIInternalService.isServiceEnabled() && !openAIInternalService.getDailyAnswers().isEmpty()) {
+                String aiResponse = openAIInternalService.getDailyAnswers().get(0);
+                String[] aiMessages = aiResponse.split("\\n");  // 정규표현식에서 개행 문자 찾는 용도로 \\n 사용함
+                
+                // 유효한 메시지만 필터링
+                List<String> validMessages = new ArrayList<>();
+                for (String message : aiMessages) {
+                    String trimmed = message.trim();
+                    // 빈 문자열이 아니고, 10자 이상이고, 한글이 포함된 메시지만 선택
+                    if (!trimmed.isEmpty() && trimmed.length() > 10 && trimmed.matches(".*[가-힣].*")) {
+                        validMessages.add(trimmed);
+                    }
+                }
+                
+                if (!validMessages.isEmpty()) {
+                    String selectedMessage = validMessages.get((int) (Math.random() * validMessages.size()));
+                    log.debug("선택된 AI 메시지: {}", selectedMessage);
+                    return selectedMessage;
+                } else {
+                    log.warn("유효한 AI 메시지가 없음, 기본 메시지 사용");
+                }
+            }
+        } catch (Exception e) {
+            log.error("GPT 응답 메세지 사용 실패, 기본 메세지를 사용합니다", e);
+        }
+        String[] defaultMessages = {
             "또 신용카드 긁기만 해봐 💸",
             "돈 관리 좀 제대로 해보자! 💰",
             "잔여 예산 확인은 언제 할 거야? 📊",
@@ -157,11 +199,7 @@ public class NotificationService {
             "이번 달 예산 벌써 다 썼어? 😤",
             "신용카드 또 긁었어? 아니지?"
         };
-        
-        String naggingMessage = naggingMessages[(int) (Math.random() * naggingMessages.length)];
-        String title = "💬 Savit 한마디";
-        sendNotificationToUser(userId, title, naggingMessage);
-        log.info("랜덤 잔소리 알림 전송 완료 - 사용자: {}, 메시지: {}", userId, naggingMessage);
+        return defaultMessages[(int) (Math.random() * defaultMessages.length)];
     }
     
     /**
