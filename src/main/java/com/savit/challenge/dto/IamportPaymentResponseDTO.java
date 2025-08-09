@@ -13,4 +13,6 @@ public class IamportPaymentResponseDTO {
     private long paidAt;
     private Long challengeId;
     private Long userId;
+    private String name;
+    private String pgProvider;
 }

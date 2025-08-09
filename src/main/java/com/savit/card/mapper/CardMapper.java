@@ -13,4 +13,5 @@ public interface CardMapper {
     int selectMonthlyUsageAmount(@Param("cardId") Long cardId);
     List<Card> selectCardsByUserId(Long userId);
     boolean existsCardByResCardNoAndUserId(@Param("resCardNo") String resCardNo, @Param("userId") Long userId);
+    Card findFirstCardByUserId(@Param("userId") Long userId);
 }

@@ -1,6 +1,10 @@
 package com.savit.challenge.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.savit.card.domain.Card;
+import com.savit.card.domain.CardTransactionVO;
+import com.savit.card.mapper.CardMapper;
+import com.savit.card.mapper.CardTransactionMapper;
 import com.savit.challenge.dto.IamportPaymentResponseDTO;
 import com.savit.challenge.mapper.ChallengeParticipationMapper;
 import com.savit.challenge.mapper.PaymentMapper;
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,6 +29,8 @@ public class IamportServiceImpl implements IamportService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final PaymentMapper paymentMapper;
     private final ChallengeParticipationMapper participationMapper;
+    private final CardMapper cardMapper;
+    private final CardTransactionMapper cardTransactionMapper;
 
     @Value("${iamport.api-key}")
     private String apiKey;
@@ -74,7 +81,46 @@ public class IamportServiceImpl implements IamportService {
 
         log.info("결제 완료 처리: merchant_uid={}, userId={}, amount={}",
                 payment.getMerchantUid(), payment.getUserId(), payment.getAmount());
+
+        // 4. 카드 트랜잭션 저장
+        insertCardTransaction(payment);
+
+        log.info("결제 완료 처리: merchant_uid={}, userId={}, amount={}",
+                payment.getMerchantUid(), payment.getUserId(), payment.getAmount());
     }
+
+    private void insertCardTransaction(IamportPaymentResponseDTO payment) {
+        Card card = cardMapper.findFirstCardByUserId(payment.getUserId());
+        if (card == null) {
+            log.warn("카드 트랜잭션 저장 실패: userId={}의 카드 정보 없음", payment.getUserId());
+            return;
+        }
+
+        Date paidDate = new Date(payment.getPaidAt() * 1000L);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HHmmss");
+        String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+
+        CardTransactionVO tx = new CardTransactionVO();
+        tx.setCardId(card.getId());
+        tx.setResCardNo(card.getResCardNo());
+        tx.setResUsedDate(dateFormat.format(paidDate));
+        tx.setResUsedTime(timeFormat.format(paidDate));
+        tx.setResUsedAmount(String.valueOf(payment.getAmount()));
+        tx.setResCancelYn("0");
+        tx.setResCancelAmount("");
+        tx.setResTotalAmount("");
+        tx.setBudgetCategoryId(null);
+        tx.setCategoryId(null);
+        tx.setResMemberStoreName(payment.getName());
+        tx.setResMemberStoreType(payment.getPgProvider());
+        tx.setCreatedAt(now);
+        tx.setUpdatedAt(now);
+
+        cardTransactionMapper.insert(tx);
+        log.info("카드 트랜잭션 저장 완료: {}", tx);
+    }
+
 
     private String fetchAccessToken() {
         HttpHeaders headers = new HttpHeaders();
@@ -113,7 +159,9 @@ public class IamportServiceImpl implements IamportService {
                 (String) data.get("status"),
                 ((Number) data.get("paid_at")).longValue(),
                 ((Number) customData.get("challengeId")).longValue(),
-                ((Number) customData.get("userId")).longValue()
+                ((Number) customData.get("userId")).longValue(),
+                (String) data.get("name"),
+                (String) data.get("pg_provider")
         );
     }
 

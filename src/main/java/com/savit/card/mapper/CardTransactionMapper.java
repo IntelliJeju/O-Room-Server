@@ -38,6 +38,8 @@ public interface CardTransactionMapper {
     Map<String, Object> findTopSpendingByUserAndDate(@Param("userId") Long userId,
                                                      @Param("targetDate") String targetDate);
 
+    void insert(CardTransactionVO transaction);
+
     // 특정 시간 범위의 거래 내역 조회(중복 방지용)
     List<CardTransactionVO> findTransactionBetweenTime (@Param("startTime") String startTime, @Param("endTime") String endTime);
 
@@ -55,4 +57,5 @@ public interface CardTransactionMapper {
                                   @Param("categoryId") Long categoryId,
                                   @Param("startDate") String startDate,
                                   @Param("endDate") String endDate);
+
 }

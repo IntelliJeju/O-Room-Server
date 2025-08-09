@@ -64,4 +64,13 @@
           AND res_cancel_yn = '0'
           AND res_used_date LIKE CONCAT(DATE_FORMAT(NOW(), '%Y%m'), '%')
     </select>
+
+    <select id="findFirstCardByUserId" resultType="com.savit.card.domain.Card">
+        SELECT *
+        FROM Card
+        WHERE user_id = #{userId}
+        ORDER BY id ASC
+            LIMIT 1
+    </select>
+
 </mapper>
